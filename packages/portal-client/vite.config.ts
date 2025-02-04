@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
+
+import { polyfillNode } from 'esbuild-plugin-polyfill-node'
 import { resolve } from 'path'
 
 // @ts-expect-error process is a nodejs global
@@ -11,7 +13,7 @@ export default defineConfig(async () => ({
   plugins: [
     react(),
     nodePolyfills({
-      include: ['buffer', 'crypto', 'util', 'stream'],
+      include: ['buffer', 'crypto', 'util', 'stream', 'process', 'events'],
       globals: {
         Buffer: true,
         global: true,
@@ -26,21 +28,25 @@ export default defineConfig(async () => ({
   resolve: {
     alias: {
       'crypto-browserify': resolve(__dirname, 'node_modules/crypto-browserify'),
-      process: 'process/browser',
+      'process': resolve(__dirname, 'process-polyfill.js'),
+      'process/browser': resolve(__dirname, 'process-polyfill.js'),
+      events: resolve(__dirname, './events-polyfill.js'),
       stream: 'stream-browserify',
       crypto: 'crypto-browserify',
       util: 'util',
       assert: 'assert',
       buffer: 'buffer/',
-      portalnetwork: resolve(__dirname, '../../portalnetwork'), 
+      portalnetwork: resolve(__dirname, '../portalnetwork/dist/index.js'), 
+    },
+    fallback: {
+      "process": resolve(__dirname, 'process-polyfill.js')
     }
   },
   define: {
     global: 'globalThis',
-    'process.env': {},
+    'process.env': '{}',
+    'process.browser': 'true',
     'fs.promises': '{}',
-    'process.version': '"v16.0.0"',
-    'process.platform': '"browser"',
     '__dirname': JSON.stringify(process.cwd()),
     '__filename': JSON.stringify(import.meta.url),
   },
@@ -48,13 +54,27 @@ export default defineConfig(async () => ({
     esbuildOptions: {
       target: "es2022",
       define: {
-        global: 'globalThis'
+        global: 'globalThis',
+      },
+      plugins: [
+        polyfillNode({
+          globals: {
+            buffer: true,
+            global: true,
+            process: true,
+          }
+        }),
+
+      ],
+      alias: {
+        events: resolve(__dirname, './events-polyfill.js')
       }
     },
     include: [
       'process',
       'crypto-browserify',
       '@libp2p/crypto',
+      '@libp2p/interface',
       '@chainsafe/enr',
       'portalnetwork',
       'buffer', 
@@ -62,11 +82,19 @@ export default defineConfig(async () => ({
       'stream', 
       'util', 
       'assert',
+      'prom-client',
+      'react',
+      'react-dom',
+      'react/jsx-dev-runtime',
+      '@multiformats/multiaddr',
+      '@tauri-apps/api/core',
     ],
-    // exclude: ['portalnetwork']
+    // exclude: ['portalnetwork', 'prom-client'],
   },
   build: {
     target: 'es2022',
+    outDir: 'dist',
+    emptyOutDir: true,
     rollupOptions: {
       external: [
         'vite-plugin-node-polyfills/shims/buffer',
@@ -76,7 +104,16 @@ export default defineConfig(async () => ({
         'fs', 
         'path', 
         'os',
-        'portalnetwork',
+        // 'portalnetwork',
+        'child_process', 
+        '@tauri-apps/api',
+        '@lodestar/types',
+        '@chainsafe/discv5',
+        '@chainsafe/enr',
+        '@ethereumjs/util',
+        '@libp2p/crypto',
+        'debug'
+        // 'eventemitter3'
       ],
     },
     output: {
