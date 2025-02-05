@@ -36,7 +36,12 @@ export default defineConfig(async () => ({
       util: 'util',
       assert: 'assert',
       buffer: 'buffer/',
-      portalnetwork: resolve(__dirname, '../portalnetwork/dist/index.js'), 
+      portalnetwork: resolve(__dirname, '../portalnetwork/dist'),
+      '@lodestar/types': resolve(__dirname, '../portalnetwork/node_modules/@lodestar/types'),
+      '@chainsafe/discv5': resolve(__dirname, '../portalnetwork/node_modules/@chainsafe/discv5'),
+      '@chainsafe/enr': resolve(__dirname, '../portalnetwork/node_modules/@chainsafe/enr'),
+      '@ethereumjs/util': resolve(__dirname, '../portalnetwork/node_modules/@ethereumjs/util'),
+      '@libp2p/crypto': resolve(__dirname, '../portalnetwork/node_modules/@libp2p/crypto') ,
     },
     fallback: {
       "process": resolve(__dirname, 'process-polyfill.js')
@@ -76,6 +81,9 @@ export default defineConfig(async () => ({
       '@libp2p/crypto',
       '@libp2p/interface',
       '@chainsafe/enr',
+      '@lodestar/types',
+      '@chainsafe/discv5',
+      '@ethereumjs/util',
       'portalnetwork',
       'buffer', 
       'crypto', 
@@ -123,6 +131,10 @@ export default defineConfig(async () => ({
     },
     commonjsOptions: {
       transformMixedEsModules: true,
+      include: [
+        /portalnetwork/,
+        /node_modules/,
+      ]
     }
   },
   esbuild: {
