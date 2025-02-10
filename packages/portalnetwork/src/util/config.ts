@@ -1,5 +1,3 @@
-import { execSync } from 'child_process'
-import { readFileSync } from 'fs'
 import { SignableENR } from '@chainsafe/enr'
 import { hexToBytes } from '@ethereumjs/util'
 import { keys } from '@libp2p/crypto'
@@ -35,6 +33,24 @@ export const NetworkStrings: Record<string, NetworkId> = {
   history: NetworkId.HistoryNetwork,
   beacon: NetworkId.BeaconChainNetwork,
   state: NetworkId.StateNetwork,
+}
+
+let execSync: Function
+let readFileSync: Function
+
+if (typeof window === 'undefined') {
+  const childProcess = require('child_process')
+  const fs = require('fs')
+
+  execSync = childProcess.execSync
+  readFileSync = fs.readFileSync
+} else {
+  execSync = () => {
+    throw new Error('execSync is not supported in the browser or Tauri environment')
+  }
+  readFileSync = () => {
+    throw new Error('readFileSync is not supported in the browser or Tauri environment')
+  }
 }
 
 export const cliConfig = async (args: PortalClientOpts) => {
