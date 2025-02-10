@@ -22,12 +22,11 @@ export default defineConfig(async () => ({
       }
       
     }),
-    polyfillNode(), // Handles Node.js polyfills automatically
-    tsconfigPaths(), // Auto-resolve paths from tsconfig.json
+    polyfillNode(),
+    tsconfigPaths(),
   ],
   resolve: {
     alias: {
-      // portalnetwork: resolve(__dirname, '/ultralight/packages/portalnetwork/src'),
       fs: resolve(__dirname, 'src/utils/polyfills/fs_browser.ts'),
       child_process: resolve(__dirname, 'src/utils/polyfills/child_process_browser.ts'),
     },
@@ -57,12 +56,8 @@ export default defineConfig(async () => ({
         /^node:.*/,
         'fs', 
         'child_process',
-      ], // Automatically exclude built-in Node.js modules
-      // output: {
-      //   manualChunks: {
-      //     vendor: ["@chainsafe/discv5", "@chainsafe/enr"],
-      //   },
-      // },
+      ],
+  
     },
     output: {
       manualChunks: {
@@ -87,7 +82,7 @@ export default defineConfig(async () => ({
         }
       : undefined,
     watch: {
-      ignored: ['**/src-tauri/**'], // Ignore Tauri's Rust code
+      ignored: ['**/src-tauri/**'],
     },
   },
 }))
