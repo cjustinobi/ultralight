@@ -6,7 +6,7 @@ import PortalComponent from './components/PortalComponent'
 const App: React.FC = () => {
 
   return (
-    <main className="container">helloxsxsa
+    <main className="container">
       <Poc />
       <PortalComponent />
     </main>

@@ -27,8 +27,9 @@ export default defineConfig(async () => ({
   ],
   resolve: {
     alias: {
-      fs: resolve(__dirname, 'src/utils/polyfills/fs_browser.ts'),
-      child_process: resolve(__dirname, 'src/utils/polyfills/child_process_browser.ts'),
+      fs: resolve(__dirname, 'src/utils/polyfills/fsBrowser.ts'),
+      child_process: resolve(__dirname, 'src/utils/polyfills/childProcessBrowser.ts'),
+      'process': resolve(__dirname, 'src/utils/polyfills/processBrowser.ts'),
     },
   },
   define: {
@@ -56,6 +57,7 @@ export default defineConfig(async () => ({
         /^node:.*/,
         'fs', 
         'child_process',
+        'prom-client',
       ],
   
     },
