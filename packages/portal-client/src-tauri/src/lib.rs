@@ -33,17 +33,20 @@ async fn portal_request(
     let socket_guard = state.socket.lock().await;
     if let Some(socket) = socket_guard.as_ref() {
 
+        println!("Processing request..");
+
         let request = json!({
             "jsonrpc": "2.0",
             "method": method,
             "params": params,
             "id": 1,
         });
-
+        println!("Request.. {:?}", request);
         let request_bytes = request.to_string().into_bytes();
+        println!("Request byte{:?}", request_bytes);
 
     
-        let target_addr = "127.0.0.1:8080";
+        let target_addr = "127.0.0.1:8545";
         socket
             .send_to(&request_bytes, target_addr)
             .await
@@ -59,7 +62,7 @@ async fn portal_request(
             .map_err(|e| format!("Failed to decode response: {}", e))?;
         let response: Value = serde_json::from_str(response_str)
             .map_err(|e| format!("Failed to parse response: {}", e))?;
-
+        println!("Response: {:?}", response);
         Ok(response)
     } else {
         Err("Socket not initialized".to_string())

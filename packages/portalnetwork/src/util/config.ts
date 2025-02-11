@@ -39,11 +39,12 @@ let execSync: Function
 let readFileSync: Function
 
 if (typeof window === 'undefined') {
-  const childProcess = require('child_process')
-  const fs = require('fs')
-
-  execSync = childProcess.execSync
-  readFileSync = fs.readFileSync
+  import('child_process').then(childProcess => {
+    execSync = childProcess.execSync
+  })
+  import('fs').then(fs => {
+    readFileSync = fs.readFileSync
+  })
 } else {
   execSync = () => {
     throw new Error('execSync is not supported in the browser or Tauri environment')

@@ -23,7 +23,7 @@ const PortalComponent = () => {
       const messageBytes = encoder.encode(message)
       await invoke('send_portal_message', {
         message: Array.from(messageBytes),
-        targetAddr: targetAddr
+        targetAddr: targetAddr,
       })
       setError('')
       alert('Message sent successfully!')
