@@ -1,78 +1,78 @@
-import { useState, useEffect } from 'react'
-import { TauriPortalClient } from '../utils/portalClient'
-import { portalRequest } from '../utils/portalApi'
+import { useState } from 'react'
+import { usePortalNetwork } from '../hooks/usePortalNetwork'
 
 export default function QueryPortal() {
+  const { transport, isInitialized, error } = usePortalNetwork()
+
   const [method, setMethod] = useState('eth_getBalance')
-  const [params, setParams] = useState('["0xAddress", "latest"]')
+  const [params, setParams] = useState(
+    '["0x3DC00AaD844393c110b61aED5849b7c82104e748", "0x02"]'
+  )
   const [result, setResult] = useState<any>(null)
-  const [status, setStatus] = useState('Starting')
-  const [error, setError] = useState('')
-  const [portalClient, setPortalClient] = useState<TauriPortalClient | null>(null)
 
   const handleQuery = async () => {
-    const parsedParams = params ? JSON.parse('["0xAddress", "latest"]') : []
-    const response = await portalRequest(method, parsedParams)
-    console.log('Response from portal:', response)
-    setResult(response)
+    if (!transport || !isInitialized) return
+
+    try {
+
+      const response = await transport.request('eth_getBalance', JSON.parse(params))
+      setResult(response)
+      console.log(response)
+    } catch (err) {
+      console.error(err)
+    }
   }
 
-  useEffect(() => {
-      const initializeClient = async () => {
-        try {
-          setStatus('Initializing client...')
-          const client = new TauriPortalClient()
-          await client.initialize()
-          setPortalClient(client)
-          console.log('portalclient ', client)
-          setStatus('Client initialized successfully')
-        } catch (err) {
-          console.error('Failed to initialize TauriPortalClient:', err)
-          setError(
-            `Failed to initialize TauriPortalClient: ${
-              err instanceof Error ? err.message : String(err)
-            }`
-          )
-          setStatus('Initialization failed')
-        }
-      }
-  
-      initializeClient()
-  
-      return () => {
-        if (portalClient) {
-          setPortalClient(null)
-        }
-      }
-    }, [])
-
-    // const balanceWei = await portalClient.getBalance(address)
-    // return console.log('Balance:', balanceWei)
-    // const balanceEth = Number(balanceWei) / 1e18
-    // setBalance(balanceEth.toFixed(6))
-
   return (
-    <div>
-      <h2>Query Ethereum Data</h2>
-      <p>Current Status: {status}</p>
-      <select value={method} onChange={e => setMethod(e.target.value)}>
-        <option value="eth_getBalance">eth_getBalance</option>
-        <option value="eth_getBlockByNumber">eth_getBlockByNumber</option>
-        <option value="eth_getBlockByHash">eth_getBlockByHash</option>
-        <option value="eth_getTransactionCount">eth_getTransactionCount</option>
-        <option value="eth_getCode">eth_getCode</option>
-        <option value="eth_getStorageAt">eth_getStorageAt</option>
-        <option value="eth_call">eth_call</option>
-      </select>
-      <input
-        type="text"
-        placeholder="Params (JSON format)"
-        value={params}
-        onChange={e => setParams(e.target.value)}
-      />
-      <button onClick={handleQuery}>Send Query</button>
-      {result && <pre>{JSON.stringify(result, null, 2)}</pre>}
-      {error && <div style={{ color: 'grey', padding: '10px 0' }}>{error}</div>}
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">Query Ethereum Data</h2>
+      <div className="mb-4">Status: {isInitialized ? 'Inititialized' : 'Not Initialized'}</div>
+
+      <div className="space-y-4">
+        <select
+          value={method}
+          onChange={e => setMethod(e.target.value)}
+          className="block w-full p-2 border rounded"
+          disabled={!isInitialized}
+        >
+          <option value="eth_getBalance">eth_getBalance</option>
+          <option value="eth_getBlockByNumber">eth_getBlockByNumber</option>
+          <option value="eth_getBlockByHash">eth_getBlockByHash</option>
+          <option value="eth_getTransactionCount">
+            eth_getTransactionCount
+          </option>
+          <option value="eth_getCode">eth_getCode</option>
+          <option value="eth_getStorageAt">eth_getStorageAt</option>
+          <option value="eth_call">eth_call</option>
+        </select>
+
+        <textarea
+          placeholder="Params (JSON format)"
+          value={params}
+          onChange={e => setParams(e.target.value)}
+          className="block w-full p-2 border rounded"
+          rows={3}
+          disabled={!isInitialized}
+        />
+
+        <button
+          onClick={handleQuery}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
+          disabled={!isInitialized}
+        >
+          Send Query
+        </button>
+
+        {error && (
+          <div className="p-4 bg-red-100 text-red-700 rounded">{error}</div>
+        )}
+
+        {result && (
+          <pre className="p-4 bg-gray-100 rounded overflow-auto">
+            {JSON.stringify(result, null, 2)}
+          </pre>
+        )}
+      </div>
     </div>
   )
 }
