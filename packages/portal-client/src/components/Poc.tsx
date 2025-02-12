@@ -7,16 +7,6 @@ const PortalComponent = () => {
   const [receivedMessage, setReceivedMessage] = useState('')
   const [error, setError] = useState('')
 
-  const initializeSocket = async () => {
-    try {
-      await invoke('initialize_socket')
-      setError('')
-      alert('Socket initialized successfully!')
-    } catch (err) {
-      setError(`Failed to initialize socket: ${err}`)
-    }
-  }
-
   const sendMessage = async () => {
     try {
       const encoder = new TextEncoder()
@@ -51,11 +41,6 @@ const PortalComponent = () => {
 
   return (
     <div>
-      <h1>Portal Messaging</h1>
-      <div>
-        <h2>Initialize Socket</h2>
-        <button onClick={initializeSocket}>Initialize Socket</button>
-      </div>
       <div>
         <h2>Send Message</h2>
         <input
@@ -68,6 +53,7 @@ const PortalComponent = () => {
           type="text"
           placeholder="Enter target address (e.g., 127.0.0.1:12345)"
           value={targetAddr}
+          disabled
           onChange={e => setTargetAddr(e.target.value)}
         />
         <button onClick={sendMessage}>Send Message</button>

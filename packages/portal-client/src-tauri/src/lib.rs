@@ -12,22 +12,22 @@ struct PortalState {
 }
 
 #[tauri::command]
-async fn initialize_socket(state: State<'_, PortalState>) -> Result<(), String> {
-    let mut socket_guard = state.socket.lock().await;
-    if socket_guard.is_some() {
-        return Ok(());
+    async fn initialize_socket(state: State<'_, PortalState>) -> Result<(), String> {
+        let mut socket_guard = state.socket.lock().await;
+        if socket_guard.is_some() {
+            return Ok(());
+        }
+
+        println!("Initializing UDP socket for Portal Network...");
+        let socket = UdpSocket::bind("0.0.0.0:9090").await.map_err(|e| {
+            println!("Failed to bind socket: {}", e);
+            e.to_string()
+        })?;
+
+        println!("Socket bound successfully to {}", socket.local_addr().map_err(|e| e.to_string())?);
+        *socket_guard = Some(socket);
+        Ok(())
     }
-
-    println!("Initializing UDP socket for Portal Network...");
-    let socket = UdpSocket::bind("127.0.0.1:9090").await.map_err(|e| {
-        println!("Failed to bind socket: {}", e);
-        e.to_string()
-    })?;
-
-    println!("Socket bound successfully to {}", socket.local_addr().map_err(|e| e.to_string())?);
-    *socket_guard = Some(socket);
-    Ok(())
-}
 
 #[tauri::command]
 async fn send_bytes(
