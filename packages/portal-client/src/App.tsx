@@ -1,14 +1,17 @@
-import React from 'react'
+import { FC } from 'react'
 import './App.css'
-import Poc from './components/Poc'
-import PortalRequest from './components/PortalRequest'
+import BlockExplorer from './components/BlockExplorer'
+import { PortalProvider } from './contexts/PortalContext'
 
-const App: React.FC = () => {
+const App: FC = () => {
 
   return (
     <main className="container">
-      <Poc />
-      <PortalRequest />
+      <PortalProvider>
+        <div className="container mx-auto p-4">
+          <BlockExplorer />
+        </div>
+      </PortalProvider>
     </main>
   )
 }
