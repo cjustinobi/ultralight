@@ -5,7 +5,7 @@ interface UseBlocksReturn {
   block: any | null
   isLoading: boolean
   error: Error | null
-  fetchBlock: (height: number) => Promise<void>
+  sendRequestHandle: (method: string, params: any[]) => Promise<void>
 }
 
 export const useBlocks = (): UseBlocksReturn => {
@@ -14,14 +14,11 @@ export const useBlocks = (): UseBlocksReturn => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
-  const fetchBlock = async (height: number) => {
+  const sendRequestHandle = async (method: string, params: any[]) => {
     try {
       setIsLoading(true)
       setError(null)
-      const blockData = await commands.sendRequest({
-        method: 'eth_getBlockByNumber',
-        params: [`0x${height.toString(16)}`, true],
-      })
+      const blockData = await commands.sendRequest({ method, params })
       setBlock(blockData)
     } catch (err) {
       setError(err as Error)
@@ -30,5 +27,5 @@ export const useBlocks = (): UseBlocksReturn => {
     }
   }
 
-  return { block, isLoading, error, fetchBlock }
+  return { block, isLoading, error, sendRequestHandle }
 }

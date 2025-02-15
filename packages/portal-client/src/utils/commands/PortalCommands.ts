@@ -17,16 +17,15 @@ export class PortalCommands {
   }
 
   async initialize(): Promise<void> {
-    const res  =await this.transport.initialize()
-    console.log('Portal Network transport initialized', res)
+    await this.transport.initialize()
   }
 
   async sendRequest(request: PortalRequest): Promise<any> {
     const { method, params } = request
     if (window.__TAURI__) {
-      return (this.transport as TauriTransport).send(method, params)
+      return (this.transport as TauriTransport).sendCommand(method, params)
     } else {
-      return (this.transport as HTTPTransport).send(method)
+      return (this.transport as HTTPTransport).portalRequest(method, params)
     }
   }
 }

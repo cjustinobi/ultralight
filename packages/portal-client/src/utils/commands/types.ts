@@ -1,6 +1,6 @@
 export interface TransportProvider {
   initialize(): Promise<void>
-  send(message: any): Promise<any>
+  sendCommand(message: any): Promise<any>
 } 
 
 export interface RequestOptions {
@@ -9,6 +9,6 @@ export interface RequestOptions {
 }
 
 export interface PortalRequest {
-  method: string;
-  params: any[];
+  method: string
+  params?: any
 }
