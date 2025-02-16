@@ -80,7 +80,7 @@ async fn initialize_socket_inner(state: &PortalState) -> Result<(), String> {
     }
 
     println!("Initializing UDP socket for Portal Network...");
-    let socket = UdpSocket::bind("0.0.0.0:9090").await.map_err(|e| {
+    let socket = UdpSocket::bind("0.0.0.0:0").await.map_err(|e| {
         println!("Failed to bind socket: {}", e);
         e.to_string()
     })?;
@@ -96,10 +96,13 @@ async fn portal_request_inner(
     params: Value,
 ) -> Result<Value, String> {
     println!("Received portal request: method={}, params={:?}", method, params);
+    let actual_method = params["method"].as_str()
+        .ok_or("Missing 'method' in params")?;
+    let actual_params = params["params"].clone();
     let request = json!({
         "jsonrpc": "2.0",
-        "method": method,
-        "params": params,
+        "method": actual_method,
+        "params": actual_params,
         "id": 1,
     });
     
