@@ -95,6 +95,7 @@ async fn portal_request_inner(
     method: String,
     params: Value,
 ) -> Result<Value, String> {
+    println!("Received portal request: method={}, params={:?}", method, params);
     let request = json!({
         "jsonrpc": "2.0",
         "method": method,
@@ -105,8 +106,11 @@ async fn portal_request_inner(
     let request_bytes = serde_json::to_vec(&request)
         .map_err(|e| format!("Failed to serialize request: {}", e))?;
 
+    println!("Sending {} bytes to 127.0.0.1:8545", request_bytes.len());
     send_bytes(state, request_bytes, "127.0.0.1:8545".into()).await?;
+    println!("Bytes sent successfully, waiting for response...");
     let (response_bytes, _) = receive_bytes(state, 5000).await?;
+    println!("Received {} bytes", response_bytes.len());
 
     let response_str = str::from_utf8(&response_bytes)
         .map_err(|e| format!("Failed to decode response: {}", e))?;
@@ -139,10 +143,17 @@ async fn send_bytes(
     let socket_guard = state.socket.lock().await;
     let socket = socket_guard.as_ref().ok_or("Socket not initialized")?;
     
-    socket.send_to(&bytes, &target).await
-        .map_err(|e| format!("Failed to send bytes: {}", e))?;
-    
-    Ok(())
+    println!("About to send bytes to {}", target);
+    match socket.send_to(&bytes, &target).await {
+        Ok(n) => {
+            println!("Successfully sent {} bytes", n);
+            Ok(())
+        },
+        Err(e) => {
+            println!("Failed to send bytes: {}", e);
+            Err(format!("Failed to send bytes: {}", e))
+        }
+    }
 }
 
 async fn receive_bytes(

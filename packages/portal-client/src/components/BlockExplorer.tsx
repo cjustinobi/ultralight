@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useBlocks } from '../hooks/useBlocks'
-import { toHex } from 'viem'
+// import { toHex } from 'viem'
 
 
 const BlockExplorer: React.FC = () => {
@@ -8,8 +8,9 @@ const BlockExplorer: React.FC = () => {
   const { block, isLoading, error, sendRequestHandle } = useBlocks()
 
   const handleFetch = () => {
-    const height = toHex(blockHeight)
-    sendRequestHandle('getblock', [height])
+    // const height = toHex(blockHeight)
+    sendRequestHandle('ping', [])
+    // sendRequestHandle('getBlockByNumber', [height])
   }
 
   return (
