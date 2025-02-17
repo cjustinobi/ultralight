@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import { usePortal } from '../contexts/PortalContext'
 
-interface UseBlocksReturn {
-  block: any | null
+interface UseNodesReturn {
+  node: any | null
   isLoading: boolean
   error: Error | null
   sendRequestHandle: (method: string, params: any[]) => Promise<void>
 }
 
-export const useBlocks = (): UseBlocksReturn => {
+export const useNodes = (): UseNodesReturn => {
   const { commands } = usePortal()
-  const [block, setBlock] = useState<any | null>(null)
+  const [node, setNode] = useState<any | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
@@ -18,8 +18,8 @@ export const useBlocks = (): UseBlocksReturn => {
     try {
       setIsLoading(true)
       setError(null)
-      const blockData = await commands.sendRequest({ method, params })
-      setBlock(blockData)
+      const nodeData = await commands.sendRequest({ method, params })
+      setNode(nodeData)
     } catch (err) {
       setError(err as Error)
     } finally {
@@ -27,5 +27,5 @@ export const useBlocks = (): UseBlocksReturn => {
     }
   }
 
-  return { block, isLoading, error, sendRequestHandle }
+  return { node, isLoading, error, sendRequestHandle }
 }

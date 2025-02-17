@@ -1,14 +1,14 @@
 import React, { useState } from 'react'
-import { useBlocks } from '../hooks/useBlocks'
+import { useNodes } from '../hooks/useNodes'
 import { toHex } from 'viem'
 
 const BlockExplorer: React.FC = () => {
-  const [blockHeight, setBlockHeight] = useState('')
-  const { block, isLoading, error, sendRequestHandle } = useBlocks()
+  const [nodeId, setNodeId] = useState('')
+  const { node, isLoading, error, sendRequestHandle } = useNodes()
 
   const handleFetch = () => {
-    const height = toHex(blockHeight)
-    sendRequestHandle('portal_findNodes', [height])
+    const nID = toHex(nodeId)
+    sendRequestHandle('portal_findNodes', [nID])
   }
 
   return (
@@ -18,23 +18,22 @@ const BlockExplorer: React.FC = () => {
       <div className="space-y-4">
         <div className="flex space-x-2">
           <input
-            type="number"
-            value={blockHeight}
-            onChange={(e) => setBlockHeight(e.target.value)}
-            placeholder="Enter block height"
+            value={nodeId}
+            onChange={(e) => setNodeId(e.target.value)}
+            placeholder="Enter nodeId"
           />
           <button onClick={handleFetch} disabled={isLoading}>
             {isLoading && <span>Loading...</span>}
-            Fetch Block
+            Get Node
           </button>
         </div>
 
         {error && <div className="text-red-500">Error: {error.message}</div>}
 
-        {block && (
+        {node && (
           <div className="space-y-2">
-            <h3 className="text-lg font-semibold">Block Details</h3>
-            <pre className="bg-gray-100 p-4 rounded">{JSON.stringify(block, null, 2)}</pre>
+            <h3 className="text-lg font-semibold">Node Details</h3>
+            <pre className="bg-gray-100 p-4 rounded">{JSON.stringify(node, null, 2)}</pre>
           </div>
         )}
       </div>
