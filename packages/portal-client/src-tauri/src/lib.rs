@@ -212,36 +212,6 @@ fn start_http_server_sync<R: Runtime>(app_handle: AppHandle<R>) {
     });
 }
 
-async fn start_http_server<R: Runtime>(app_handle: AppHandle<R>) {
-    let state = Arc::new(PortalState::default());
-    app_handle.manage(state.clone());
-    
-    let cors = tower_http::cors::CorsLayer::new()
-        .allow_origin(tower_http::cors::Any)
-        .allow_methods([http::Method::POST])
-        .allow_headers([http::header::CONTENT_TYPE]);
-    
-    let app = Router::new()
-        .route("/api/portal", post(handle_portal_request))
-        .layer(cors)
-        .with_state(state);
-
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
-    println!("Starting HTTP server on {}", addr);
-    
-    match axum::serve(
-        tokio::net::TcpListener::bind(addr)
-            .await
-            .expect("Failed to bind server"),
-        app.into_make_service(),
-    )
-    .await
-    {
-        Ok(_) => println!("HTTP server stopped"),
-        Err(e) => eprintln!("HTTP server error: {}", e),
-    }
-}
-
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {

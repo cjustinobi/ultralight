@@ -4,7 +4,7 @@ import { multiaddr } from '@multiformats/multiaddr'
 import { PortalNetwork, NetworkId, TransportLayer, BaseNetwork } from 'portalnetwork'
 import debug from 'debug'
 import { DEFAULT_BOOTNODES } from 'portalnetwork/dist/util/bootnodes'
-import { PortalUDPHandler } from './portalUDPHandler.js'
+import { PortalUDPHandler } from './portalUDPHandler'
 
 const log = debug('portal-client')
 
