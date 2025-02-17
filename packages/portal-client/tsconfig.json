@@ -24,10 +24,10 @@
     "baseUrl": ".",
     "paths": {
       "portalnetwork": ["./ultralight/packages/portalnetwork/src/index"],
-      "portalnetwork/*": ["./ultralight/packages/portalnetwork/src/*"],
+      "portalnetwork/*": ["./ultralight/packages/portalnetwork/src/*"]
     }
   },
   "include": ["./src"],
   "exclude": ["./dist"],
-  "references": [{ "path": "../portalnetwork/tsconfig.json" }],
+  "references": [{ "path": "../portalnetwork/tsconfig.json" }]
 }

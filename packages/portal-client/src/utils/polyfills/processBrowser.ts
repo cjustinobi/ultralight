@@ -21,7 +21,7 @@ export const processBrowser = {
     node: '20.0.0',
     v8: '8.0.0',
     modules: '88',
-  }
+  },
 }
 
 export default processBrowser

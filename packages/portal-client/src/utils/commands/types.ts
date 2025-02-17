@@ -1,11 +1,11 @@
 export interface TransportProvider {
   initialize(): Promise<void>
   sendCommand(message: any): Promise<any>
-} 
+}
 
 export interface RequestOptions {
-  method: string;
-  params: any[];
+  method: string
+  params: any[]
 }
 
 export interface PortalRequest {

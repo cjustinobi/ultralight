@@ -9,9 +9,7 @@ interface PortalContextType {
 
 const PortalContext = createContext<PortalContextType | null>(null)
 
-export const PortalProvider: FC<{ children: React.ReactNode }> = ({
-  children
-}) => {
+export const PortalProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isInitialized, setIsInitialized] = useState(false)
   const [error, setError] = useState<Error | null>(null)
   const [commands] = useState(() => new PortalCommands())
@@ -20,7 +18,7 @@ export const PortalProvider: FC<{ children: React.ReactNode }> = ({
     commands
       .initialize()
       .then(() => setIsInitialized(true))
-      .catch(err => setError(err))
+      .catch((err) => setError(err))
   }, [commands])
 
   return (
@@ -37,4 +35,3 @@ export const usePortal = () => {
   }
   return context
 }
-   

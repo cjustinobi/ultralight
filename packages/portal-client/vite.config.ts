@@ -7,7 +7,7 @@ import { builtinModules } from 'module'
 import { resolve } from 'path'
 
 // @ts-expect-error process is a Node.js global
-const host = process.env.TAURI_DEV_HOST;
+const host = process.env.TAURI_DEV_HOST
 
 export default defineConfig(async () => ({
   plugins: [
@@ -19,8 +19,7 @@ export default defineConfig(async () => ({
         Buffer: true,
         global: true,
         process: true,
-      }
-      
+      },
     }),
     polyfillNode(),
     tsconfigPaths(),
@@ -29,15 +28,15 @@ export default defineConfig(async () => ({
     alias: {
       fs: resolve(__dirname, 'src/utils/polyfills/fsBrowser.ts'),
       child_process: resolve(__dirname, 'src/utils/polyfills/childProcessBrowser.ts'),
-      'process': resolve(__dirname, 'src/utils/polyfills/processBrowser.ts'),
+      process: resolve(__dirname, 'src/utils/polyfills/processBrowser.ts'),
     },
   },
   define: {
     global: 'globalThis',
     'process.env': '{}',
     'process.browser': 'true',
-    '__dirname': JSON.stringify(process.cwd()),
-    '__filename': JSON.stringify(import.meta.url),
+    __dirname: JSON.stringify(process.cwd()),
+    __filename: JSON.stringify(import.meta.url),
   },
   optimizeDeps: {
     esbuildOptions: {
@@ -52,14 +51,7 @@ export default defineConfig(async () => ({
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
-      external: [
-        ...builtinModules, 
-        /^node:.*/,
-        'fs', 
-        'child_process',
-        'prom-client',
-      ],
-  
+      external: [...builtinModules, /^node:.*/, 'fs', 'child_process', 'prom-client'],
     },
     output: {
       manualChunks: {

@@ -4,7 +4,6 @@ import BlockExplorer from './components/BlockExplorer'
 import { PortalProvider } from './contexts/PortalContext'
 
 const App: FC = () => {
-
   return (
     <main className="container">
       <PortalProvider>
@@ -17,4 +16,3 @@ const App: FC = () => {
 }
 
 export default App
-

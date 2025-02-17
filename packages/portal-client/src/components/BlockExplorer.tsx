@@ -1,21 +1,18 @@
 import React, { useState } from 'react'
 import { useBlocks } from '../hooks/useBlocks'
-// import { toHex } from 'viem'
-
+import { toHex } from 'viem'
 
 const BlockExplorer: React.FC = () => {
   const [blockHeight, setBlockHeight] = useState('')
   const { block, isLoading, error, sendRequestHandle } = useBlocks()
 
   const handleFetch = () => {
-    // const height = toHex(blockHeight)
-    sendRequestHandle('ping', [])
-    // sendRequestHandle('getBlockByNumber', [height])
+    const height = toHex(blockHeight)
+    sendRequestHandle('portal_findNodes', [height])
   }
 
   return (
     <div className="w-full max-w-2xl mx-auto mt-4">
-
       <div>Block Explorer</div>
 
       <div className="space-y-4">
@@ -23,7 +20,7 @@ const BlockExplorer: React.FC = () => {
           <input
             type="number"
             value={blockHeight}
-            onChange={e => setBlockHeight(e.target.value)}
+            onChange={(e) => setBlockHeight(e.target.value)}
             placeholder="Enter block height"
           />
           <button onClick={handleFetch} disabled={isLoading}>
@@ -37,9 +34,7 @@ const BlockExplorer: React.FC = () => {
         {block && (
           <div className="space-y-2">
             <h3 className="text-lg font-semibold">Block Details</h3>
-            <pre className="bg-gray-100 p-4 rounded">
-              {JSON.stringify(block, null, 2)}
-            </pre>
+            <pre className="bg-gray-100 p-4 rounded">{JSON.stringify(block, null, 2)}</pre>
           </div>
         )}
       </div>
