@@ -15,6 +15,7 @@ export class PortalUDPHandler extends EventEmitter {
   private bindAddress: string
   private udpPort: number
   private rpcMethodRegistry: RPCMethodRegistry = {}
+  private isRunning: boolean = false
 
   constructor(portal: PortalNetwork, bindAddress: string, udpPort: number) {
     super()
@@ -44,6 +45,7 @@ export class PortalUDPHandler extends EventEmitter {
   async start(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.socket.bind(this.udpPort, this.bindAddress, () => {
+        this.isRunning = true
         console.log(`UDP Server listening on ${this.bindAddress}:${this.udpPort}`)
         resolve()
       })
@@ -141,9 +143,28 @@ export class PortalUDPHandler extends EventEmitter {
     })
   }
 
-  async stop(): Promise<void> {
-    return new Promise((resolve) => {
-      this.socket.close(() => resolve())
+   async stop(): Promise<void> {
+    return new Promise<void>((resolve) => {
+      if (!this.isRunning) {
+        resolve()
+        return
+      }
+
+      const onClose = () => {
+        this.isRunning = false
+        this.socket.removeListener('close', onClose)
+        resolve()
+      }
+
+      this.socket.on('close', onClose)
+
+      try {
+        this.socket.close()
+      } catch (err) {
+        console.warn('Error while closing UDP socket:', err)
+        this.isRunning = false
+        resolve()
+      }
     })
   }
 }
