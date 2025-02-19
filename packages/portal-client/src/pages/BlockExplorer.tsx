@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNodes } from '../hooks/useNodes'
 import { toHex } from 'viem'
+import logo from '/logo.svg'
 
 const BlockExplorer: React.FC = () => {
   const [nodeId, setNodeId] = useState('')
@@ -14,7 +15,6 @@ const BlockExplorer: React.FC = () => {
   return (
     <div className="w-full max-w-2xl mx-auto mt-4">
       <div>Block Explorer</div>
-
       <div className="space-y-4">
         <div className="flex space-x-2">
           <input
@@ -27,6 +27,7 @@ const BlockExplorer: React.FC = () => {
             Get Node
           </button>
         </div>
+        <img src={logo} alt="Description" className="" />
 
         {error && <div className="text-red-500">Error: {error.message}</div>}
 
