@@ -39,6 +39,8 @@ export class PortalUDPHandler extends EventEmitter {
     this.rpcMethodRegistry = {
       'portal_ping': this.handlePing.bind(this),
       'portal_findNodes': this.handleFindNodes.bind(this),
+      'eth_getBlockByHash': this.handleEthGetBlockByHash.bind(this),
+      'eth_getBlockByNumber': this.handleEthGetBlockByNumber.bind(this),
     }
   }
 
@@ -94,29 +96,14 @@ export class PortalUDPHandler extends EventEmitter {
       
       console.log('Response (before serialization):', response)
 
-      const serializedResponse = JSON.stringify(response, (_, value) => {
-        if (typeof value === 'bigint') return value.toString()
-        return value
-      })
-
-      this.socket.send(serializedResponse, rinfo.port, rinfo.address, (error: Error | null) => {
-        if (error) {
-          console.error('Error sending response:', error)
-        }
-      })
+  
     } catch (error) {
       console.error('Error handling message:', error)
       const errorResponse = {
         error: error instanceof Error ? error.message : 'Unknown error',
         id: null,
       }
-
-      const serializedError = JSON.stringify(errorResponse, (_, value) => {
-        if (typeof value === 'bigint') return value.toString()
-        return value
-      })
-
-      this.socket.send(serializedError, rinfo.port, rinfo.address)
+      throw new Error(JSON.stringify(errorResponse))
     }
   }
 
@@ -143,28 +130,85 @@ export class PortalUDPHandler extends EventEmitter {
     })
   }
 
-   async stop(): Promise<void> {
-    return new Promise<void>((resolve) => {
-      if (!this.isRunning) {
-        resolve()
-        return
-      }
-
-      const onClose = () => {
-        this.isRunning = false
-        this.socket.removeListener('close', onClose)
-        resolve()
-      }
-
-      this.socket.on('close', onClose)
-
-      try {
-        this.socket.close()
-      } catch (err) {
-        console.warn('Error while closing UDP socket:', err)
-        this.isRunning = false
-        resolve()
-      }
-    })
+  private async handleEthGetBlockByHash(params: any[]): Promise<any> {
+    console.log('here inside handler ...')
+    if (!params || !params[0]) {
+      throw new Error('Missing Block Hash parameter')
+    }
+    
+    if (!this.portal) {
+      throw new Error('Node not initialized')
+    }
+    const nodes = await this.portal.ETH.getBlockByHash(params[0], false)
+    return nodes
   }
+
+  private async handleEthGetBlockByNumber(params: any[]): Promise<any> {
+    console.log('here inside handler ...', params)
+    if (!params || !params[0]) {
+      throw new Error('Missing Block Number parameter')
+    }
+    
+    if (!this.portal) {
+      throw new Error('Node not initialized')
+    }
+    const nodes = await this.portal.ETH.getBlockByNumber(params[0], false)
+    return nodes
+  }
+
+  async stop(): Promise<void> {
+  return new Promise<void>((resolve) => {
+    if (!this.isRunning) {
+      resolve()
+      return
+    }
+
+    const onClose = () => {
+      this.isRunning = false
+      resolve()
+    }
+
+    // If the socket is already closed, resolve immediately
+    if (!this.isRunning) {
+      onClose()
+      return
+    }
+
+    this.socket.once('close', onClose) // Ensure 'close' fires once
+
+    try {
+      this.socket.close()
+      this.socket.unref() // Allows Node.js to exit if nothing else is running
+    } catch (err) {
+      console.warn('Error while closing UDP socket:', err)
+      onClose() // Ensure we resolve even if an error occurs
+    }
+  })
+}
+
+
+  //  async stop(): Promise<void> {
+  //   return new Promise<void>((resolve) => {
+  //     if (!this.isRunning) {
+  //       resolve()
+  //       return
+  //     }
+
+  //     const onClose = () => {
+  //       this.isRunning = false
+  //       this.socket.removeListener('close', onClose)
+  //       resolve()
+  //     }
+
+  //     this.socket.on('close', onClose)
+
+  //     try {
+  //       this.socket.close()
+  //     } catch (err) {
+  //       console.warn('Error while closing UDP socket:', err)
+  //       this.isRunning = false
+  //       resolve()
+  //     }
+  //   })
+  // }
 }

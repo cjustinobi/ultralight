@@ -9,7 +9,7 @@ const Header = () => {
   return (
     <header className="navbar bg-base-100 px-12">
       <div className="navbar-start">
-        <Link to="/x`" className="btn btn-ghost text-xl">
+        <Link to="/" className="btn btn-ghost text-xl">
           Ultralight
         </Link>
       </div>

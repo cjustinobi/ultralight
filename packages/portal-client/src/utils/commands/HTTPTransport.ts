@@ -49,7 +49,7 @@ export class HTTPTransport implements TransportProvider {
     if (!this.initialized && request.method !== 'initialize_socket') {
       throw new Error('Transport not initialized')
     }
-
+console.log('the instance ', request.params instanceof Uint8Array)
     try {
       const requestBody = {
         method: request.method,
@@ -58,7 +58,12 @@ export class HTTPTransport implements TransportProvider {
 
       // Use a BigInt-safe JSON stringifier
       const safeStringify = (obj: any) =>
-        JSON.stringify(obj, (_, value) => (typeof value === 'bigint' ? value.toString() : value))
+      JSON.stringify(obj, (_, value) => {
+        if (typeof value === 'bigint') return value.toString()
+          
+        if (value instanceof Uint8Array) return [...value] // Convert Uint8Array to array
+        return value
+      })
 
       console.log('Sending Portal Network request:', safeStringify(requestBody))
 

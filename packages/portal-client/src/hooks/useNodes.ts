@@ -15,6 +15,7 @@ export const useNodes = (): UseNodesReturn => {
   const [error, setError] = useState<Error | null>(null)
 
   const sendRequestHandle = async (method: string, params: any[]) => {
+    console.log('params inside sendrequest handle ', params)
     try {
       setIsLoading(true)
       setError(null)

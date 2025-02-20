@@ -1,11 +1,11 @@
-import BlockExplorer from "./BlockExplorer"
+import JsonRpc from '@/components/jsonrpc/JsonRpc'
 
-const JsonRpc = () => {
+const JsonRpcRequest = () => {
   return (
     <div>
-      <BlockExplorer />
+      <JsonRpc />
     </div>
   )
 }
 
-export default JsonRpc
+export default JsonRpcRequest
