@@ -49,19 +49,18 @@ export class HTTPTransport implements TransportProvider {
     if (!this.initialized && request.method !== 'initialize_socket') {
       throw new Error('Transport not initialized')
     }
-console.log('the instance ', request.params instanceof Uint8Array)
+
     try {
       const requestBody = {
         method: request.method,
         params: request.params || {},
       }
 
-      // Use a BigInt-safe JSON stringifier
       const safeStringify = (obj: any) =>
       JSON.stringify(obj, (_, value) => {
         if (typeof value === 'bigint') return value.toString()
           
-        if (value instanceof Uint8Array) return [...value] // Convert Uint8Array to array
+        if (value instanceof Uint8Array) return [...value]
         return value
       })
 
@@ -80,7 +79,6 @@ console.log('the instance ', request.params instanceof Uint8Array)
       })
 
       clearTimeout(timeoutId)
-      console.log('Portal Network response status:', response.status)
 
       const responseText = await response.text()
 
@@ -90,7 +88,6 @@ console.log('the instance ', request.params instanceof Uint8Array)
           responseData = JSON.parse(responseText)
           console.log('Portal Network parsed response:', responseData)
         } catch (parseError) {
-          console.warn('Response is not valid JSON, returning as text:', responseText)
           return {
             result: responseText,
             textResponse: true,
@@ -119,7 +116,11 @@ console.log('the instance ', request.params instanceof Uint8Array)
         )
       }
 
-      return responseData
+      if ('result' in responseData) {
+        return responseData.result
+      } else {
+        throw new Error('Invalid response format')
+      }
     } catch (error) {
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
@@ -138,7 +139,7 @@ console.log('the instance ', request.params instanceof Uint8Array)
   }
 
   async portalRequest(method: string, params: any[] = []): Promise<any> {
-    return this.sendCommand({
+    return await this.sendCommand({
       method: 'portal_request',
       params: {
         method,

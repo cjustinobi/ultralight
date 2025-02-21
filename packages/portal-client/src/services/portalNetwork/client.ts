@@ -52,12 +52,12 @@ export class PortalClient {
       this.logger('State Network status:', !!this.stateNetwork)
       this.logger(this.node)
     } catch (error) {
-      console.error('Portal Network initialization failed:', error)
+      console.log('Portal Network initialization failed:', error)
       throw error
     }
 
     process.on('uncaughtException', (err) => {
-      console.error('Uncaught Exception:', err)
+      console.log('Uncaught Exception:', err)
     })
 
     process.on('SIGINT', async () => {

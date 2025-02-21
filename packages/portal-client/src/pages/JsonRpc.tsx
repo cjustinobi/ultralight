@@ -1,9 +1,11 @@
-import JsonRpc from '@/components/jsonrpc/JsonRpc'
+// import JsonRpc from '@/components/jsonrpc/JsonRpc'
+import BlockExplorer from '@/components/jsonrpc/BlockExplorer'
 
 const JsonRpcRequest = () => {
   return (
     <div>
-      <JsonRpc />
+      {/* <JsonRpc /> */}
+      <BlockExplorer  />
     </div>
   )
 }

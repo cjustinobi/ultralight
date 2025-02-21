@@ -1,6 +1,6 @@
 import { createSocket, Socket } from 'dgram'
 import { EventEmitter } from 'eventemitter3'
-import { PortalNetwork } from 'portalnetwork'
+import { formatBlockResponse, PortalNetwork } from 'portalnetwork'
 import { MAX_PACKET_SIZE } from '../../utils/constants'
 
 type RPCMethodHandler = (params: any[]) => Promise<any>
@@ -37,7 +37,6 @@ export class PortalUDPHandler extends EventEmitter {
 
   private registerRPCMethods() {
     this.rpcMethodRegistry = {
-      'portal_ping': this.handlePing.bind(this),
       'portal_findNodes': this.handleFindNodes.bind(this),
       'eth_getBlockByHash': this.handleEthGetBlockByHash.bind(this),
       'eth_getBlockByNumber': this.handleEthGetBlockByNumber.bind(this),
@@ -68,11 +67,12 @@ export class PortalUDPHandler extends EventEmitter {
       if (this.rpcMethodRegistry[request.method]) {
         try {
           const result = await this.rpcMethodRegistry[request.method](request.params || [])
-          response = {
-            jsonrpc: '2.0',
-            result,
-            id: request.id
-          }
+          response = formatBlockResponse(result, false)
+          // response = {
+          //   jsonrpc: '2.0',
+          //   result,
+          //   id: request.id
+          // }
         } catch (err) {
           response = {
             jsonrpc: '2.0',
@@ -96,19 +96,32 @@ export class PortalUDPHandler extends EventEmitter {
       
       console.log('Response (before serialization):', response)
 
+      const serializedResponse = JSON.stringify(response, (_, value) => {
+        if (typeof value === 'bigint') return value.toString()
+        return value
+      })
+
+      console.log('serialized response ', serializedResponse)
   
+      this.socket.send(serializedResponse, rinfo.port, rinfo.address, (error: Error | null) => {
+        if (error) {
+          console.error('Error sending response:', error)
+        }
+      })
     } catch (error) {
       console.error('Error handling message:', error)
       const errorResponse = {
         error: error instanceof Error ? error.message : 'Unknown error',
         id: null,
       }
-      throw new Error(JSON.stringify(errorResponse))
-    }
-  }
 
-   private async handlePing(): Promise<any> {
-    return 'pong'
+      const serializedError = JSON.stringify(errorResponse, (_, value) => {
+        if (typeof value === 'bigint') return value.toString()
+        return value
+      })
+
+      this.socket.send(serializedError, rinfo.port, rinfo.address)
+    }
   }
 
   private async handleFindNodes(params: any[]): Promise<any> {
@@ -168,47 +181,20 @@ export class PortalUDPHandler extends EventEmitter {
       resolve()
     }
 
-    // If the socket is already closed, resolve immediately
     if (!this.isRunning) {
       onClose()
       return
     }
 
-    this.socket.once('close', onClose) // Ensure 'close' fires once
+    this.socket.once('close', onClose)
 
     try {
       this.socket.close()
-      this.socket.unref() // Allows Node.js to exit if nothing else is running
+      this.socket.unref()
     } catch (err) {
       console.warn('Error while closing UDP socket:', err)
-      onClose() // Ensure we resolve even if an error occurs
+      onClose()
     }
   })
 }
-
-
-  //  async stop(): Promise<void> {
-  //   return new Promise<void>((resolve) => {
-  //     if (!this.isRunning) {
-  //       resolve()
-  //       return
-  //     }
-
-  //     const onClose = () => {
-  //       this.isRunning = false
-  //       this.socket.removeListener('close', onClose)
-  //       resolve()
-  //     }
-
-  //     this.socket.on('close', onClose)
-
-  //     try {
-  //       this.socket.close()
-  //     } catch (err) {
-  //       console.warn('Error while closing UDP socket:', err)
-  //       this.isRunning = false
-  //       resolve()
-  //     }
-  //   })
-  // }
 }

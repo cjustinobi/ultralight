@@ -1,1 +1,1 @@
-export const MAX_PACKET_SIZE = 1280
+export const MAX_PACKET_SIZE = 1460
