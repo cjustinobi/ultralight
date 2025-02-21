@@ -83,6 +83,10 @@ export class PortalClient {
     return this.node
   }
 
+  getUDPHandler(): PortalUDPHandler | undefined {
+    return this.udpHandler;
+  }
+
   // Network operation methods
   async bootstrap(): Promise<void> {
     await this.node?.bootstrap()
@@ -101,14 +105,54 @@ async function initializePortalNetwork(
 
 async function main() {
   try {
-    await initializePortalNetwork()
+    const bindPort = parseInt(process.env.BIND_PORT || '9090');
+    const udpPort = parseInt(process.env.UDP_PORT || '8545');
+    
+    const node = await initializePortalNetwork(bindPort, udpPort);
+    
+    // Add error handling for the UDP socket
+    const udpHandler = node.getUDPHandler();
+    if (udpHandler) {
+      udpHandler.on('error', (error) => {
+        console.error('UDP Socket error:', error);
+      });
+    }
+
+    // Handle process signals
+    process.on('SIGINT', async () => {
+      await node.shutdown();
+      process.exit(0);
+    });
+
+    process.on('SIGTERM', async () => {
+      await node.shutdown();
+      process.exit(0);
+    });
+
+    // Log successful startup
+    console.log(`Portal Network started on ports: ${bindPort} (bind) / ${udpPort} (UDP)`);
   } catch (error) {
-    console.error('Error initializing Portal Network:', error)
-    process.exit(1)
+    console.error('Error initializing Portal Network:', error);
+    process.exit(1);
   }
 }
 
-main().catch((err) => {
-  console.error('Encountered an error', err)
-  console.error('Shutting down...')
-})
+// Ensure we catch any top-level errors
+main().catch((error) => {
+  console.error('Fatal error:', error);
+  process.exit(1);
+});
+
+// async function main() {
+//   try {
+//     await initializePortalNetwork()
+//   } catch (error) {
+//     console.error('Error initializing Portal Network:', error)
+//     process.exit(1)
+//   }
+// }
+
+// main().catch((err) => {
+//   console.error('Encountered an error', err)
+//   console.error('Shutting down...')
+// })

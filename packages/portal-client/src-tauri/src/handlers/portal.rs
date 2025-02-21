@@ -47,7 +47,6 @@
 //     portal_request_inner(&state, method, params).await
 // }
 
-// src/handlers/portal.rs
 use crate::state::PortalState;
 use crate::network::udp::{send_bytes, receive_bytes};
 use serde_json::{Value, json};
@@ -63,10 +62,8 @@ pub async fn portal_request_inner(
     let actual_method = params["method"].as_str()
         .ok_or("Missing 'method' in params")?;
         
-    // Extract and flatten the parameters
     let actual_params = match params["params"].as_array() {
         Some(array) => {
-            // If the first element is an array, flatten it
             if array.len() == 1 && array[0].is_array() {
                 array[0].as_array()
                     .unwrap_or(&Vec::new())

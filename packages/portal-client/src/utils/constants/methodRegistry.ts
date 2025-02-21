@@ -21,7 +21,7 @@ export const methodRegistry: Record<MethodType, MethodConfig> = {
     name: 'Get Block By Hash',
     paramPlaceholder: 'Enter Block Hash',
     handler: (hash: string, sendRequest: Function) => {
-      sendRequest('eth_getBlockByHash', [hexToBytes(hash)]);
+      sendRequest('eth_getBlockByHash', [hexToBytes(`0x${hash}`)]);
     }
   },
   'eth_getBlockByNumber': {
@@ -42,14 +42,14 @@ export const methodRegistry: Record<MethodType, MethodConfig> = {
     name: 'Get Block Receipts',
     paramPlaceholder: 'Enter Block Hash',
     handler: (hash: string, sendRequest: Function) => {
-      sendRequest('eth_getBlockReceipts', [hexToBytes(hash)]);
+      sendRequest('eth_getBlockReceipts', [hexToBytes(`0x${hash}`)]);
     }
   },
   'eth_getLogs': {
     name: 'Get Logs',
     paramPlaceholder: 'Enter Block Hash',
     handler: (hash: string, sendRequest: Function) => {
-      sendRequest('eth_getLogs', [hexToBytes(hash)]);
+      sendRequest('eth_getLogs', [hexToBytes(`0x${hash}`)]);
     }
   }
 };

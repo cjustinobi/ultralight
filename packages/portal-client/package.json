@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build:portal": "vite build --config vite.portal-client.config.ts",
+    "build": "tsc && vite build && npm run build:portal",
     "preview": "vite preview",
     "tauri": "tauri",
+    "tauri:build": "npm run build && tauri build",
     "format": "npx prettier . --write",
     "format:check": "npx prettier . --check"
   },
