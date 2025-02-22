@@ -17,7 +17,8 @@ export class PortalCommands {
   }
 
   async initialize(): Promise<void> {
-    await this.transport.initialize()
+    await this.transport.initializePortal()
+    await this.transport.bindUdp()
   }
 
   async sendRequest(request: PortalRequest): Promise<any> {

@@ -1,5 +1,5 @@
 import { createContext, FC, useContext, useEffect, useState } from 'react'
-import { PortalCommands } from '../utils/commands/PortalCommands'
+import { PortalCommands } from '@/utils/commands/PortalCommands'
 
 interface PortalContextType {
   commands: PortalCommands
