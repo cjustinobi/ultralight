@@ -1,8 +1,6 @@
 use std::process::Command;
 use std::path::Path;
-use tauri::async_runtime::spawn;
-use tauri::{App, AppHandle, Runtime};
-use tokio::sync::Mutex;
+use tauri::{App};
 use std::sync::Arc;
 use tauri::Manager;
 use crate::PortalState;
@@ -95,8 +93,4 @@ pub async fn setup_portal_process(app: &mut App) -> Result<(), Box<dyn std::erro
     });
 
     Ok(())
-}
-
-async fn is_port_available(port: u16) -> bool {
-    tokio::net::TcpListener::bind(("127.0.0.1", port)).await.is_ok()
 }

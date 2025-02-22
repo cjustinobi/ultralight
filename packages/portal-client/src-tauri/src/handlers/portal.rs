@@ -1,10 +1,8 @@
 use crate::state::PortalState;
-use crate::network::http::start_http_server;
 use crate::portal_process::PortalProcess;
 use crate::network::udp::{send_bytes, receive_bytes};
 use serde_json::{Value, json};
 use tauri::State;
-use tauri::App;
 use std::str;
 use std::sync::Arc;
 use tokio::net::UdpSocket;

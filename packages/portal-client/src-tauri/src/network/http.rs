@@ -8,11 +8,9 @@ use axum::{
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tauri::{Runtime, AppHandle, Manager};
-use serde_json::{json};
 use crate::state::PortalState;
 use crate::types::{request::PortalRequest, response::PortalResponse};
-use crate::handlers::{socket, portal};
-use crate::socket::SocketConfig;
+use crate::handlers::{portal};
 
 async fn handle_portal_request(
     AxumState(state): AxumState<Arc<PortalState>>,
