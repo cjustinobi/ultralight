@@ -26,7 +26,15 @@ async fn handle_portal_request(
                     error: Some("Missing or invalid bind_port parameter".to_string()),
                 })))?;
             
-            portal::initialize_portal_inner(&state, bind_port).await
+            let udp_port = request.params.get("udp_port")
+                .and_then(|v| v.as_u64())
+                .map(|v| v as u16)
+                .ok_or_else(|| (StatusCode::BAD_REQUEST, Json(PortalResponse {
+                    result: None,
+                    error: Some("Missing or invalid udp_port parameter".to_string()),
+                })))?;
+            
+            portal::initialize_portal_inner(&state, bind_port, udp_port).await
         },
         "initialize_udp" => {
             let udp_port = request.params.get("udp_port")

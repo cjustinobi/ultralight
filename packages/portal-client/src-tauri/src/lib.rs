@@ -17,9 +17,7 @@ pub fn run() {
             })
         })
         .invoke_handler(tauri::generate_handler![
-            // handlers::socket::initialize_socket,
             handlers::portal::portal_request,
-            // handlers::portal::start_portal,
             handlers::portal::initialize_portal,
             handlers::portal::initialize_udp,
             handlers::portal::stop_portal,

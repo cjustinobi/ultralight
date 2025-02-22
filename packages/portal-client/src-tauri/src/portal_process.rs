@@ -15,7 +15,7 @@ impl PortalProcess {
         Self { child: None }
     }
 
-    pub fn start(&mut self, bind_port: u16) -> Result<(), String> {
+    pub fn start(&mut self, bind_port: u16, udp_port: u16) -> Result<(), String> {
         // Ensure we don't have a running process
         if let Some(mut child) = self.child.take() {
             let _ = child.kill();
@@ -29,12 +29,12 @@ impl PortalProcess {
             return Err("Portal client binary not found. Please ensure the binary is built.".to_string());
         }
 
-        // Start the process with only bind_port
         let child = Command::new("node")
             .arg("--experimental-modules")
             .arg("--no-warnings")
             .arg(binary_path)
             .env("BIND_PORT", bind_port.to_string())
+            .env("UDP_PORT", udp_port.to_string())
             .spawn()
             .map_err(|e| format!("Failed to start portal process: {}", e))?;
 

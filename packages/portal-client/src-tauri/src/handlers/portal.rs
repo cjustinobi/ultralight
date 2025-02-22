@@ -69,31 +69,63 @@ pub async fn portal_request(
 }
 
 pub async fn initialize_portal_inner(
-    state: &Arc<PortalState>,
-    bind_port: u16,
+    state: &Arc<PortalState>, 
+    bind_port: u16, 
+    udp_port: u16
 ) -> Result<Value, String> {
+    // Stop any existing portal process
     let mut portal_process = state.portal_process.lock().await;
-    
     if let Some(process) = portal_process.as_mut() {
-        process.stop()?;
+        let _ = process.stop();
     }
-    
-    let mut new_process = PortalProcess::new();
-    new_process.start(bind_port)?;
-    *portal_process = Some(new_process);
-    
+
+    // Start the portal process with the specified ports
+    if portal_process.is_none() {
+        *portal_process = Some(PortalProcess::new());
+    }
+
+    if let Some(process) = portal_process.as_mut() {
+        process.start(bind_port, udp_port)
+            .map_err(|e| format!("Failed to start portal process: {}", e))?;
+    }
+
+    // Return the port information
     Ok(serde_json::json!({
-        "status": "success",
-        "bind_port": bind_port
+        "bindPort": bind_port,
+        "udpPort": udp_port,
+        "status": "initialized"
     }))
 }
+
+// pub async fn initialize_portal_inner(
+//     state: &Arc<PortalState>,
+//     bind_port: u16,
+//     udp_port: u16,
+// ) -> Result<Value, String> {
+//     let mut portal_process = state.portal_process.lock().await;
+    
+//     if let Some(process) = portal_process.as_mut() {
+//         process.stop()?;
+//     }
+    
+//     let mut new_process = PortalProcess::new();
+//     new_process.start(bind_port, udp_port)?;
+//     *portal_process = Some(new_process);
+    
+//     Ok(serde_json::json!({
+//         "status": "success",
+//         "bind_port": bind_port,
+//         "udp_port": udp_port,
+//     }))
+// }
 
 #[tauri::command]
 pub async fn initialize_portal(
     state: State<'_, Arc<PortalState>>,
     bind_port: u16,
+    udp_port: u16,
 ) -> Result<Value, String> {
-    initialize_portal_inner(&state, bind_port).await
+    initialize_portal_inner(&state, bind_port, udp_port).await
 }
 
 pub async fn initialize_udp_inner(
@@ -126,16 +158,32 @@ pub async fn initialize_udp(
 }
 
 pub async fn stop_portal_inner(state: &Arc<PortalState>) -> Result<Value, String> {
+    // Stop the portal process
     let mut portal_process = state.portal_process.lock().await;
     if let Some(process) = portal_process.as_mut() {
         process.stop()?;
-        *portal_process = None;
     }
-    
+    *portal_process = None;
+
+    // Close the UDP socket
+    let mut socket_guard = state.socket.lock().await;
+    *socket_guard = None;
+
     Ok(serde_json::json!({
-        "status": "success"
+        "status": "stopped"
     }))
 }
+// pub async fn stop_portal_inner(state: &Arc<PortalState>) -> Result<Value, String> {
+//     let mut portal_process = state.portal_process.lock().await;
+//     if let Some(process) = portal_process.as_mut() {
+//         process.stop()?;
+//         *portal_process = None;
+//     }
+    
+//     Ok(serde_json::json!({
+//         "status": "success"
+//     }))
+// }
 
 #[tauri::command]
 pub async fn stop_portal(

@@ -4,6 +4,7 @@ import { multiaddr } from '@multiformats/multiaddr'
 import { PortalNetwork, NetworkId, TransportLayer, BaseNetwork } from 'portalnetwork'
 import debug, { Debugger } from 'debug'
 import { DEFAULT_BOOTNODES } from 'portalnetwork/dist/util/bootnodes'
+import { PortalUDPHandler } from './portalUDPHandler'
 
 const portalClientDebugString = 'PortalClient'
 
@@ -12,16 +13,16 @@ export class PortalClient {
   private historyNetwork?: BaseNetwork
   private stateNetwork?: BaseNetwork
   private enr?: SignableENR
+  private udpHandler?: PortalUDPHandler
   private logger: Debugger = debug(portalClientDebugString)
   private isInitialized: boolean = false
 
-  async init(bindPort: number): Promise<void> {
+  async init(bindPort: number = 9090, udpPort: number = 8545): Promise<void> {
     if (this.isInitialized) {
       await this.shutdown()
     }
 
     try {
-      // Validate port
       if (bindPort <= 0) {
         throw new Error('Invalid bind port number')
       }
@@ -49,7 +50,10 @@ export class PortalClient {
       this.historyNetwork = this.node.network()['0x500b']!
       this.stateNetwork = this.node.network()['0x500a']!
 
+      this.udpHandler = new PortalUDPHandler(this.node, '127.0.0.1', udpPort)
+
       await this.node.start()
+      await this.udpHandler.start()
       this.node.enableLog(portalClientDebugString)
       this.isInitialized = true
 
@@ -96,9 +100,9 @@ export class PortalClient {
   }
 }
 
-async function initializePortalNetwork(bindPort: number): Promise<PortalClient> {
+async function initializePortalNetwork(bindPort: number, udpPort: number): Promise<PortalClient> {
   const node = new PortalClient()
-  await node.init(bindPort)
+  await node.init(bindPort, udpPort)
   return node
 }
 
@@ -107,8 +111,9 @@ async function main() {
 
   try {
     const bindPort = parseInt(process.env.BIND_PORT || '9090')
+    const udpPort = parseInt(process.env.UDP_PORT || '8545')
     
-    node = await initializePortalNetwork(bindPort)
+    node = await initializePortalNetwork(bindPort, udpPort)
     
     // Proper cleanup on process signals
     const cleanup = async () => {

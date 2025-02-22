@@ -26,6 +26,7 @@ export class HTTPTransport implements TransportProvider {
         method: 'initialize_portal',
         params: {
           bind_port: 9090,
+          udp_port: 8546,
         },
       })
 
