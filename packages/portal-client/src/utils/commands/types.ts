@@ -1,6 +1,5 @@
 export interface TransportProvider {
   initializePortal(): Promise<void>
-  bindUdp(): Promise<void>
   sendCommand(message: any): Promise<any>
 }
 

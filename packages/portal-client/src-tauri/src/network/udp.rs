@@ -7,7 +7,7 @@ pub async fn send_bytes(
     target: String,
 ) -> Result<(), String> {
     let socket_guard = state.socket.lock().await;
-    let socket = socket_guard.as_ref().ok_or("Socket not initialized")?;
+    let socket = socket_guard.as_ref().ok_or("Socket not initializegggd")?;
     
     println!("About to send bytes to {}", target);
     match socket.send_to(&bytes, &target).await {

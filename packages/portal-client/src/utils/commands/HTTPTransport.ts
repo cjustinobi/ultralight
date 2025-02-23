@@ -26,29 +26,6 @@ export class HTTPTransport implements TransportProvider {
         method: 'initialize_portal',
         params: {
           bind_port: 9090,
-          udp_port: 8546,
-        },
-      })
-
-      if (response.error) {
-        throw new Error(response.error)
-      }
-
-      this.initialized = true
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Failed to initialize transport: ${error.message}`)
-      } else {
-        throw new Error('Failed to initialize transport: Unknown error')
-      }
-    }
-  }
-
-  async bindUdp(): Promise<void> {
-    try {
-      const response = await this.sendCommand({
-        method: 'initialize_udp',
-        params: {
           udp_port: 8545,
         },
       })
@@ -71,10 +48,6 @@ export class HTTPTransport implements TransportProvider {
     if (!request.method) {
       throw new Error('Method name is required')
     }
-
-    // if (!this.initialized && request.method !== 'initialize_socket') {
-    //   throw new Error('Transport not initialized')
-    // }
 
     try {
       const requestBody = {
