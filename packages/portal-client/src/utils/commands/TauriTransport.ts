@@ -7,9 +7,8 @@ export class TauriTransport implements TransportProvider {
     return invoke('initialize_portal')
   }
 
-  async bindUdp(): Promise<void> {
-    // const { invoke } = await import('@tauri-apps/api/core')
-    return invoke('initialize_udp')
+  async shutdownPortal(): Promise<void> {
+    return invoke('shutdown_portal')
   }
 
   async sendCommand(command: string, args?: any): Promise<any> {

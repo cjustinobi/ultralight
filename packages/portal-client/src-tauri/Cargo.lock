@@ -3881,25 +3881,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tauri-app"
-version = "0.1.0"
-dependencies = [
- "axum",
- "futures-util",
- "http 1.2.0",
- "hyper",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-opener",
- "tokio",
- "tokio-tungstenite",
- "tower 0.4.13",
- "tower-http",
-]
-
-[[package]]
 name = "tauri-build"
 version = "2.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4508,6 +4489,25 @@ dependencies = [
  "memoffset",
  "tempfile",
  "winapi",
+]
+
+[[package]]
+name = "ultralight"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "futures-util",
+ "http 1.2.0",
+ "hyper",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-opener",
+ "tokio",
+ "tokio-tungstenite",
+ "tower 0.4.13",
+ "tower-http",
 ]
 
 [[package]]

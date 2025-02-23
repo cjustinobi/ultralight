@@ -44,6 +44,27 @@ export class HTTPTransport implements TransportProvider {
     }
   }
 
+  async shutdownPortal(): Promise<void> {
+    try {
+      const response = await this.sendCommand({
+        method: 'shutdown_portal',
+        params: {},
+      })
+
+      if (response.error) {
+        throw new Error(response.error)
+      }
+
+      this.initialized = true
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to initialize transport: ${error.message}`)
+      } else {
+        throw new Error('Failed to initialize transport: Unknown error')
+      }
+    }
+  }
+
   async sendCommand(request: { method: string; params?: any }): Promise<any> {
     if (!request.method) {
       throw new Error('Method name is required')

@@ -37,8 +37,8 @@ async fn handle_portal_request(
             
             portal::initialize_portal_inner(&state, bind_port, udp_port).await
         },
-        "stop_portal" => {
-            portal::stop_portal_inner(&state).await
+        "shutdown_portal" => {
+            portal::shutdown_portal_inner(&state).await
         },
         "portal_request" => {
             portal::portal_request_inner(&state, request.method, request.params).await

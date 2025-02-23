@@ -110,7 +110,7 @@ pub async fn initialize_portal(
 }
 
 
-pub async fn stop_portal_inner(state: &Arc<PortalState>) -> Result<Value, String> {
+pub async fn shutdown_portal_inner(state: &Arc<PortalState>) -> Result<Value, String> {
     
     let mut process_guard = state.portal_process.lock().await;
     if let Some(process) = process_guard.as_mut() {
@@ -127,8 +127,8 @@ pub async fn stop_portal_inner(state: &Arc<PortalState>) -> Result<Value, String
 }
 
 #[tauri::command]
-pub async fn stop_portal(
+pub async fn shutdown_portal(
     state: State<'_, Arc<PortalState>>,
 ) -> Result<Value, String> {
-    stop_portal_inner(&state).await
+    shutdown_portal_inner(&state).await
 }
