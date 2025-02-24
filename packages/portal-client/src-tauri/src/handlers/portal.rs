@@ -1,18 +1,19 @@
 use crate::state::PortalState;
 use crate::portal_process::PortalProcess;
 use crate::network::udp::{send_bytes, receive_bytes};
-use serde_json::{Value, json};
+use serde_json::{Value};
 use tauri::State;
-use std::str;
 use std::sync::Arc;
 use tokio::net::UdpSocket;
 use std::net::SocketAddr;
 
 pub async fn portal_request_inner(
     state: &Arc<PortalState>,
-    method: String,
     params: Value,
 ) -> Result<Value, String> {
+
+    let port_guard = state.udp_port.lock().await;
+    let udp_port = port_guard.ok_or_else(|| "UDP port not initialized".to_string())?;
     
     let rpc_method = params.get("method")
         .and_then(|m| m.as_str())
@@ -32,7 +33,7 @@ pub async fn portal_request_inner(
     let request_bytes = serde_json::to_vec(&request)
         .map_err(|e| format!("Failed to serialize request: {}", e))?;
 
-    let target_addr = format!("127.0.0.1:{}", 8545);
+    let target_addr = format!("127.0.0.1:{}", udp_port);
 
     send_bytes(state, request_bytes, target_addr.clone()).await?;
 
@@ -47,10 +48,9 @@ pub async fn portal_request_inner(
 #[tauri::command]
 pub async fn portal_request(
     state: tauri::State<'_, Arc<PortalState>>,
-    method: String,
     params: Value,
 ) -> Result<Value, String> {
-    portal_request_inner(&state, method, params).await
+    portal_request_inner(&state, params).await
 }
 
 pub async fn initialize_portal_inner(
@@ -60,6 +60,9 @@ pub async fn initialize_portal_inner(
 ) -> Result<Value, String> {
     let socket_addr = initialize_socket(state).await?;
     let dynamic_udp_port = socket_addr.port();
+
+    let mut port_guard = state.udp_port.lock().await;
+    *port_guard = Some(udp_port);
 
     let mut process_guard = state.portal_process.lock().await;
     if process_guard.is_none() {
@@ -88,7 +91,7 @@ async fn initialize_socket(state: &Arc<PortalState>) -> Result<SocketAddr, Strin
     }
 
     println!("Initializing UDP socket for Portal Network...");
-    let socket = UdpSocket::bind("127.0.0.1:0").await
+    let socket = UdpSocket::bind("0.0.0.0:0").await
         .map_err(|e| format!("Failed to bind initial socket: {}", e))?;
     
     let bound_addr = socket.local_addr()
@@ -120,6 +123,9 @@ pub async fn shutdown_portal_inner(state: &Arc<PortalState>) -> Result<Value, St
 
     let mut socket_guard = state.socket.lock().await;
     *socket_guard = None;
+
+    let mut port_guard = state.udp_port.lock().await;
+    *port_guard = None;
 
     Ok(serde_json::json!({
         "status": "stopped"

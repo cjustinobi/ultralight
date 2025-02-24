@@ -41,7 +41,7 @@ async fn handle_portal_request(
             portal::shutdown_portal_inner(&state).await
         },
         "portal_request" => {
-            portal::portal_request_inner(&state, request.method, request.params).await
+            portal::portal_request_inner(&state, request.params).await
         },
         _ => Err("Unknown method".to_string())
     };
