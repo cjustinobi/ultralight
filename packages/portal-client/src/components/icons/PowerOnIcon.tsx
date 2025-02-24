@@ -8,7 +8,7 @@ const PowerOnIcon = () => (
     strokeWidth="3"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className="lucide lucide-power"
+    className="lucide lucide-power-on"
   >
     <path d="M12 2v10" />
     <path d="M18.4 6.6a9 9 0 1 1-12.77.04" />

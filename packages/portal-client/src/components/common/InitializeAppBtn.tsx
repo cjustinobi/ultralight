@@ -1,4 +1,3 @@
-
 import PowerOnIcon from '@/components/icons/PowerOnIcon'
 import PowerOffIcon from '@/components/icons/PowerOffIcon'
 import useInitializeApp from '@/hooks/useInitializeApp'
