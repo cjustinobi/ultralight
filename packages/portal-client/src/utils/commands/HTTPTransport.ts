@@ -25,8 +25,8 @@ export class HTTPTransport implements TransportProvider {
       const response = await this.sendCommand({
         method: 'initialize_portal',
         params: {
-          bind_port: 9090,
-          udp_port: 8545,
+          bind_port: 9091,
+          udp_port: 8546,
         },
       })
 

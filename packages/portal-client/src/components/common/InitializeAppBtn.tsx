@@ -1,32 +1,17 @@
-import { Power } from 'lucide-react'
-import { usePortal } from '@/contexts/PortalContext'
+
+import PowerOnIcon from '@/components/icons/PowerOnIcon'
+import PowerOffIcon from '@/components/icons/PowerOffIcon'
+import useInitializeApp from '@/hooks/useInitializeApp'
 
 const InitializeAppBtn = () => {
-  const { isInitialized, setIsInitialized, commands } = usePortal()
-
-  const handleInitialize = async () => {
-    if (isInitialized) {
-      await commands.shutdown()
-      return setIsInitialized(false)
-    }
-      await commands.initialize()
-      setIsInitialized(true)
-  }
+ const { handleInitialize } = useInitializeApp()
 
   return (
-    <div
-      onClick={handleInitialize}
-      className={`p-2 rounded-full cursor-pointer transition-colors ${
-        isInitialized ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
-      }`}
-    >
-      <Power
-        size={18}
-        strokeWidth={4}
-        absoluteStrokeWidth
-        className={`w-2 h-2 ${isInitialized ? 'text-white' : 'text-white'}`}
-      />
-    </div>
+    <label onClick={handleInitialize} className="toggle text-base-content">
+      <input type="checkbox" className="toggle-primary" />
+      <PowerOffIcon />
+      <PowerOnIcon />
+    </label>
   )
 }
 
