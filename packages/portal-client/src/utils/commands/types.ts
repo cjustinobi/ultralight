@@ -1,5 +1,6 @@
 export interface TransportProvider {
-  initialize(): Promise<void>
+  initializePortal(): Promise<void>
+  shutdownPortal(): Promise<void>
   sendCommand(message: any): Promise<any>
 }
 

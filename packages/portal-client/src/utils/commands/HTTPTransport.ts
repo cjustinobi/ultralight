@@ -20,10 +20,34 @@ export class HTTPTransport implements TransportProvider {
     this.timeoutMs = config.timeoutMs || 10000
   }
 
-  async initialize(): Promise<void> {
+  async initializePortal(): Promise<void> {
     try {
       const response = await this.sendCommand({
-        method: 'initialize_socket',
+        method: 'initialize_portal',
+        params: {
+          bind_port: 9091,
+          udp_port: 8546,
+        },
+      })
+
+      if (response.error) {
+        throw new Error(response.error)
+      }
+
+      this.initialized = true
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to initialize transport: ${error.message}`)
+      } else {
+        throw new Error('Failed to initialize transport: Unknown error')
+      }
+    }
+  }
+
+  async shutdownPortal(): Promise<void> {
+    try {
+      const response = await this.sendCommand({
+        method: 'shutdown_portal',
         params: {},
       })
 
@@ -46,19 +70,19 @@ export class HTTPTransport implements TransportProvider {
       throw new Error('Method name is required')
     }
 
-    if (!this.initialized && request.method !== 'initialize_socket') {
-      throw new Error('Transport not initialized')
-    }
-
     try {
       const requestBody = {
         method: request.method,
         params: request.params || {},
       }
 
-      // Use a BigInt-safe JSON stringifier
       const safeStringify = (obj: any) =>
-        JSON.stringify(obj, (_, value) => (typeof value === 'bigint' ? value.toString() : value))
+      JSON.stringify(obj, (_, value) => {
+        if (typeof value === 'bigint') return value.toString()
+          
+        if (value instanceof Uint8Array) return [...value]
+        return value
+      })
 
       console.log('Sending Portal Network request:', safeStringify(requestBody))
 
@@ -75,7 +99,6 @@ export class HTTPTransport implements TransportProvider {
       })
 
       clearTimeout(timeoutId)
-      console.log('Portal Network response status:', response.status)
 
       const responseText = await response.text()
 
@@ -85,7 +108,6 @@ export class HTTPTransport implements TransportProvider {
           responseData = JSON.parse(responseText)
           console.log('Portal Network parsed response:', responseData)
         } catch (parseError) {
-          console.warn('Response is not valid JSON, returning as text:', responseText)
           return {
             result: responseText,
             textResponse: true,
@@ -114,7 +136,11 @@ export class HTTPTransport implements TransportProvider {
         )
       }
 
-      return responseData
+      if ('result' in responseData) {
+        return responseData.result
+      } else {
+        throw new Error('Invalid response format')
+      }
     } catch (error) {
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
@@ -133,7 +159,7 @@ export class HTTPTransport implements TransportProvider {
   }
 
   async portalRequest(method: string, params: any[] = []): Promise<any> {
-    return this.sendCommand({
+    return await this.sendCommand({
       method: 'portal_request',
       params: {
         method,

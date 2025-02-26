@@ -2,11 +2,11 @@ import { SignableENR } from '@chainsafe/enr'
 import { keys } from '@libp2p/crypto'
 import { multiaddr } from '@multiformats/multiaddr'
 import { PortalNetwork, NetworkId, TransportLayer, BaseNetwork } from 'portalnetwork'
-import debug from 'debug'
+import debug, { Debugger } from 'debug'
 import { DEFAULT_BOOTNODES } from 'portalnetwork/dist/util/bootnodes'
-import { PortalUDPHandler } from './portalUDPHandler.js'
+import { PortalUDPHandler } from './portalUDPHandler'
 
-const log = debug('portal-client')
+const portalClientDebugString = 'PortalClient'
 
 export class PortalClient {
   private node?: PortalNetwork
@@ -14,9 +14,19 @@ export class PortalClient {
   private stateNetwork?: BaseNetwork
   private enr?: SignableENR
   private udpHandler?: PortalUDPHandler
+  private logger: Debugger = debug(portalClientDebugString)
+  private isInitialized: boolean = false
 
   async init(bindPort: number = 9090, udpPort: number = 8545): Promise<void> {
+    if (this.isInitialized) {
+      await this.shutdown()
+    }
+
     try {
+      if (bindPort <= 0) {
+        throw new Error('Invalid bind port number')
+      }
+
       const privateKey = await keys.generateKeyPair('secp256k1')
       this.enr = SignableENR.createFromPrivateKey(privateKey)
 
@@ -44,30 +54,40 @@ export class PortalClient {
 
       await this.node.start()
       await this.udpHandler.start()
+      this.node.enableLog(portalClientDebugString)
+      this.isInitialized = true
 
-      this.node.enableLog('portal-network')
-
-      log('Portal Network initialized successfully')
-      log('History Network status:', !!this.historyNetwork)
-      log('State Network status:', !!this.stateNetwork)
+      this.logger('Portal Network initialized successfully')
+      this.logger(`Bind Port: ${bindPort}`)
+      this.logger('History Network status:', !!this.historyNetwork)
+      this.logger('State Network status:', !!this.stateNetwork)
+      this.logger(this.node)
     } catch (error) {
-      console.error('Portal Network initialization failed:', error)
+      this.logger('Portal Network initialization failed:', error)
+      await this.cleanup()
       throw error
     }
+  }
 
-    process.on('uncaughtException', (err) => {
-      console.error('Uncaught Exception:', err)
-    })
-
-    process.on('SIGINT', async () => {
-      await this.shutdown()
-    })
+  private async cleanup(): Promise<void> {
+    try {
+      if (this.udpHandler) {
+        await this.udpHandler.stop()
+      }
+      if (this.node) {
+        await this.node.stop()
+      }
+    } catch (error) {
+      this.logger('Cleanup error:', error)
+    }
+    this.isInitialized = false
+    this.node = undefined
+    this.udpHandler = undefined
   }
 
   async shutdown(): Promise<void> {
-    console.log('Shutting down Portal Network node...')
-    await this.udpHandler?.stop()
-    await this.node?.stop()
+    this.logger('Shutting down Portal Network node...')
+    await this.cleanup()
   }
 
   getHistoryNetwork(): BaseNetwork | undefined {
@@ -82,63 +102,52 @@ export class PortalClient {
     return this.node
   }
 
-  // Network operation methods
   async bootstrap(): Promise<void> {
     await this.node?.bootstrap()
   }
-
-  async sendHistoryPing(): Promise<any> {
-    if (!this.historyNetwork) {
-      throw new Error('History Network not initialized')
-    }
-    const enr = this.historyNetwork.enr.toENR()
-    return await this.historyNetwork.sendPing(enr)
-  }
-
-  async sendStatePing(): Promise<any> {
-    if (!this.stateNetwork) {
-      throw new Error('State Network not initialized')
-    }
-    const enr = this.stateNetwork.enr.toENR()
-    return await this.stateNetwork.sendPing(enr)
-  }
-
-  async findHistoryNodes(distances: number[]): Promise<any> {
-    if (!this.historyNetwork) {
-      throw new Error('History Network not initialized')
-    }
-    const enr = this.historyNetwork.enr.toENR()
-    return await this.historyNetwork.sendFindNodes(enr, distances)
-  }
-
-  async findStateNodes(distances: number[]): Promise<any> {
-    if (!this.stateNetwork) {
-      throw new Error('State Network not initialized')
-    }
-    const enr = this.stateNetwork.enr.toENR()
-    return await this.stateNetwork.sendFindNodes(enr, distances)
-  }
 }
 
-async function initializePortalNetwork(
-  bindPort: number = 9090,
-  udpPort: number = 8545,
-): Promise<PortalClient> {
-  const node = new PortalClient()
-  await node.init(bindPort, udpPort)
-  return node
+let portalClientInstance: PortalClient | undefined
+
+async function initializePortalNetwork(bindPort: number, udpPort: number): Promise<PortalClient> {
+  if (portalClientInstance) {
+    await portalClientInstance.shutdown()
+  }
+  portalClientInstance = new PortalClient()
+  await portalClientInstance.init(bindPort, udpPort)
+  return portalClientInstance
 }
 
 async function main() {
+  let node: PortalClient | undefined
+
   try {
-    await initializePortalNetwork()
+    const bindPort = parseInt(process.env.BIND_PORT || '9090')
+    const udpPort = parseInt(process.env.UDP_PORT || '8545')
+    
+    node = await initializePortalNetwork(bindPort, udpPort)
+    
+    const cleanup = async () => {
+      if (node) {
+        await node.shutdown()
+      }
+      process.exit(0)
+    }
+
+    process.on('SIGINT', cleanup)
+    process.on('SIGTERM', cleanup)
+    
+    console.log(`Portal Network started on bind port: ${bindPort}`)
   } catch (error) {
     console.error('Error initializing Portal Network:', error)
+    if (node) {
+      await node.shutdown()
+    }
     process.exit(1)
   }
 }
 
-main().catch((err) => {
-  console.error('Encountered an error', err)
-  console.error('Shutting down...')
+main().catch(async (error) => {
+  console.error('Fatal error:', error)
+  process.exit(1)
 })

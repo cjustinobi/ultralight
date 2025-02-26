@@ -5,6 +5,7 @@ import polyfillNode from 'rollup-plugin-polyfill-node'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { builtinModules } from 'module'
 import { resolve } from 'path'
+import tailwindcss from '@tailwindcss/vite'
 
 // @ts-expect-error process is a Node.js global
 const host = process.env.TAURI_DEV_HOST
@@ -12,6 +13,7 @@ const host = process.env.TAURI_DEV_HOST
 export default defineConfig(async () => ({
   plugins: [
     react(),
+    tailwindcss(),
     nodePolyfills({
       include: ['child_process'],
       protocolImports: true,
@@ -29,6 +31,7 @@ export default defineConfig(async () => ({
       fs: resolve(__dirname, 'src/utils/polyfills/fsBrowser.ts'),
       child_process: resolve(__dirname, 'src/utils/polyfills/childProcessBrowser.ts'),
       process: resolve(__dirname, 'src/utils/polyfills/processBrowser.ts'),
+      '@': resolve(__dirname, './src'),
     },
   },
   define: {
