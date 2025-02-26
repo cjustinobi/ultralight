@@ -12,7 +12,7 @@ const ConfigPage = () => {
     {
       id: 'node-bind-port',
       title: 'Node Bind Port',
-      defaultValue: '3000',
+      defaultValue: '9090',
       description: 'The port to bind the node server',
     },
     {

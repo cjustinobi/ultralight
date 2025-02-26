@@ -1,6 +1,6 @@
 use std::process::Command;
 use std::path::Path;
-use tauri::{App};
+use tauri::App;
 use std::sync::Arc;
 use tauri::Manager;
 

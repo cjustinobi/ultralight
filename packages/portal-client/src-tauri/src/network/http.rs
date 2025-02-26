@@ -11,7 +11,7 @@ use tauri::{Runtime, AppHandle, Manager};
 
 use crate::state::PortalState;
 use crate::types::{request::PortalRequest, response::PortalResponse};
-use crate::handlers::{portal};
+use crate::handlers::portal;
 
 async fn handle_portal_request(
     AxumState(state): AxumState<Arc<PortalState>>,
