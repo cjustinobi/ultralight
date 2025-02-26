@@ -29,7 +29,7 @@ pub async fn receive_bytes(
     let socket_guard = state.socket.lock().await;
     let socket = socket_guard.as_ref().ok_or("Socket not initialized")?;
 
-    let mut buf = vec![0u8; 65535];
+    let mut buf = vec![0u8; 65535]
     
     match timeout(Duration::from_millis(timeout_ms), socket.recv_from(&mut buf)).await {
         Ok(Ok((len, addr))) => {
