@@ -1,5 +1,5 @@
 use crate::state::PortalState;
-use tokio::time::{timeout, Duration};
+use tokio::time::{timeout, Duration}
 
 pub async fn send_bytes(
     state: &PortalState,
