@@ -15,7 +15,7 @@ import {
   StateNetwork,
   SyncStrategy,
 } from '../networks/index.js'
-import { CapacitorUDPTransportService, WebSocketTransportService } from '../transports/index.js'
+import { CapacitorUDPTransportService, WebSocketTransportService, TauriUDPTransportService } from '../transports/index.js'
 import { MEGABYTE } from '../util/index.js'
 import { PortalNetworkUTP } from '../wire/utp/PortalNetworkUtp/index.js'
 
@@ -137,7 +137,7 @@ export class PortalNetwork extends EventEmitter<PortalNetworkEvents> {
         break
       }
       case TransportLayer.MOBILE:
-        config.transport = new CapacitorUDPTransportService(ma, config.enr.nodeId)
+        config.transport = new TauriUDPTransportService(ma, config.enr.nodeId)
         break
       case TransportLayer.NODE:
         config.transport = new UDPTransportService({

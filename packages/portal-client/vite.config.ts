@@ -32,12 +32,8 @@ export default defineConfig(async () => ({
       child_process: resolve(__dirname, 'src/utils/polyfills/childProcessBrowser.ts'),
       process: resolve(__dirname, 'src/utils/polyfills/processBrowser.ts'),
       'bls-eth-wasm': resolve(__dirname, 'src/utils/polyfills/blsPatch.ts'),
+      // 'dgram': resolve(__dirname, 'src/utils/polyfills/dgram.ts'),
       '@chainsafe/bls-keygen': resolve(__dirname, 'src/utils/polyfills/blsKeyGen.ts'),
-      // '@': resolve(__dirname, './src'),
-
-      // portalnetwork: resolve(__dirname, '/ultralight/packages/portalnetwork/src'),
-      // fs: resolve(__dirname, 'src/utils/polyfills/fs_browser.ts'),
-      // child_process: resolve(__dirname, 'src/utils/polyfills/child_process_browser.ts'),
     },
   },
   define: {
@@ -55,7 +51,7 @@ export default defineConfig(async () => ({
         global: 'globalThis',
       },
     },
-    exclude: ['@chainsafe/bls', 'herumi-*'],
+    // exclude: ['@chainsafe/bls', 'herumi-*'],
     include: ['@chainsafe/bls/switchable', 'bls-eth-wasm'],
     // include: ['bls-eth-wasm'],
   },
@@ -65,6 +61,9 @@ export default defineConfig(async () => ({
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
+      input:{
+        main: resolve(__dirname, 'index.html'),
+      },
       external: [
         ...builtinModules, 
         /^node:.*/,

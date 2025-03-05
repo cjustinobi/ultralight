@@ -9,6 +9,7 @@ function App() {
     async function initialize() {
       try {
         const client = await createPortalClient()
+        console.log('Portal client created successfully', client)
         setPortalClient(client)
       } catch (error) {
         console.error('Failed to initialize portal client:', error)
@@ -19,7 +20,7 @@ function App() {
   }, [])
 
   if (!portalClient) {
-    return <div>Loading...</div>
+    return <div>Loading....</div>
   }
 
   return (
