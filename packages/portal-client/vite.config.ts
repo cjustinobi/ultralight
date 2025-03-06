@@ -53,7 +53,6 @@ export default defineConfig(async () => ({
     },
     // exclude: ['@chainsafe/bls', 'herumi-*'],
     include: ['@chainsafe/bls/switchable', 'bls-eth-wasm'],
-    // include: ['bls-eth-wasm'],
   },
   assetsInclude: ['**/*.wasm'],
   build: {

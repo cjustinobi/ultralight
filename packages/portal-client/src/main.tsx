@@ -1,6 +1,5 @@
-import '@/utils/polyfills/dgram'
+// import '@/utils/polyfills/dgram'
 import './utils/polyfills/polyfills'
-// import './utils/polyfills/processBrowser'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'

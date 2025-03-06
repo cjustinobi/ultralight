@@ -10,7 +10,9 @@ const BlockExplorer: FC = () => {
   const [inputValue, setInputValue] = useState('')
   const { node, isLoading, error, sendRequestHandle } = useNodes()
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    // const res = await sendRequestHandle(selectedMethod, [inputValue])
+    // console.log('res', res)
     if (selectedMethod && methodRegistry[selectedMethod]) {
       methodRegistry[selectedMethod].handler(inputValue, sendRequestHandle)
     }

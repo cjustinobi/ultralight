@@ -6,6 +6,7 @@ import { DEFAULT_BOOTNODES } from 'portalnetwork/dist/util/bootnodes'
 
 export async function createPortalClient(port = 9090) {
   const nodeAddr = multiaddr(`/ip4/0.0.0.0/udp/${port}`)
+  console.log('Node address:', nodeAddr.toString())
 
   const privateKey = await keys.generateKeyPair('secp256k1')
   const enr = SignableENR.createFromPrivateKey(privateKey)
@@ -27,6 +28,6 @@ export async function createPortalClient(port = 9090) {
   })
 
   await node.start()
-  console.log('after create node', node)
+  console.log('Node after start:', node)
   return node
 }

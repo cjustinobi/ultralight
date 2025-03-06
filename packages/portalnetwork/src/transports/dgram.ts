@@ -15,6 +15,7 @@ class MockDgramSocket extends EventEmitter {
 
   bind(port: number, address: string, callback?: (error?: Error) => void) {
     try {
+      // Simulate async bind operation
       bind(this.socketId, `${address}:${port}`).then(() => {
         this.isListening = true
         if (callback) callback()
@@ -60,6 +61,7 @@ class MockDgramSocket extends EventEmitter {
     }
   }
 
+  // Utility method for base64 conversion
   private uint8ArrayToBase64(array: Uint8Array): string {
     return btoa(
       Array.from(array)
@@ -69,6 +71,7 @@ class MockDgramSocket extends EventEmitter {
   }
 }
 
+// Mock dgram module to replace Node.js implementation
 const mockDgram = {
   // @ts-ignore
   createSocket: (type: string) => {
@@ -78,11 +81,11 @@ const mockDgram = {
   },
 }
 
-console.log('Applying dgram polyfill:', mockDgram)
+console.log('Applying dgram:', mockDgram)
 if (typeof window !== 'undefined' && !(window as any).dgram) {
   (window as any).dgram = mockDgram
 }
-// if (typeof global !== 'undefined' && !(global as any).dgram) {
-//   (global as any).dgram = mockDgram;
-// }
+if (typeof global !== 'undefined' && !(global as any).dgram) {
+  (global as any).dgram = mockDgram
+}
 export default mockDgram
