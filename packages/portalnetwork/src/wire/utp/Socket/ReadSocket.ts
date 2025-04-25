@@ -18,7 +18,7 @@ export class ReadSocket extends UtpSocket {
   }
   async handleSynPacket(seqNr: number): Promise<void> {
     this.setState(ConnectionState.SynRecv)
-    this.logger(`Connection State: SynRecv`)
+    this.logger('Connection State: SynRecv')
     this.setAckNr(seqNr)
     // This initiates an OFFER.
     // The first DATA packet will have seqNr + 1
@@ -42,10 +42,7 @@ export class ReadSocket extends UtpSocket {
       expected = this.ackNr + 1 === packet.header.seqNr
     }
     this.setSeqNr(this.getSeqNr() + 1)
-    if (!this.reader) {
-      this.reader = new ContentReader(packet.header.seqNr)
-      this.reader.bytesExpected = Infinity
-    }
+
     // Add the packet.seqNr to this.ackNrs at the relative index, regardless of order received.
     if (this.ackNrs[0] === undefined) {
       this.logger(`Setting AckNr[0] to ${packet.header.seqNr}`)
@@ -56,19 +53,19 @@ export class ReadSocket extends UtpSocket {
       )
       this.ackNrs[packet.header.seqNr - this.ackNrs[0]] = packet.header.seqNr
     }
-    this.reader.addPacket(packet)
+    this.reader!.addPacket(packet)
     this.logger(
       `Packet bytes: ${packet.payload!.length} bytes.  Total bytes: ${
-        this.reader.bytesReceived
+        this.reader!.bytesReceived
       } bytes.`,
     )
     if (expected) {
       // Update this.ackNr to last in-order seqNr received.
-      const future = this.ackNrs.slice(packet.header.seqNr - this.ackNrs[0]!)
+      const future = this.ackNrs.slice(packet.header.seqNr - this.ackNrs[0])
       this.ackNr = future.slice(future.findIndex((n, i, ackNrs) => ackNrs[i + 1] === undefined))[0]!
       if (this.state === ConnectionState.GotFin) {
         if (this.ackNr === this.finNr) {
-          this.logger(`All data packets received. Running compiler.`)
+          this.logger('All data packets received. Running compiler.')
           await this.sendAckPacket()
           return this.close(true)
         }
@@ -78,7 +75,7 @@ export class ReadSocket extends UtpSocket {
     } else {
       // Do not increment this.ackNr
       // Send SELECTIVE_ACK with bitmask of received seqNrs > this.ackNr
-      this.logger(`Packet has arrived out of order.  Replying with SELECTIVE ACK.`)
+      this.logger('Packet has arrived out of order.  Replying with SELECTIVE ACK.')
       const bitmask = this.generateSelectiveAckBitMask()
       return this.sendAckPacket(bitmask)
     }
@@ -112,14 +109,14 @@ export class ReadSocket extends UtpSocket {
     this.logger.extend('READING')(`Returning ${_content.length} bytes.`)
     return Uint8Array.from(_content)
   }
-  close(compile: boolean = false): Uint8Array | undefined {
+  close(compile = false): Uint8Array | undefined {
     this.logger.extend('CLOSE')(`Closing connection to ${this.remoteAddress}`)
     this.logger.extend('CLOSE')(`compile=${compile}`)
     clearInterval(this.packetManager.congestionControl.timeoutCounter)
     this.packetManager.congestionControl.removeAllListeners()
     this._clearTimeout()
     if (compile === true) {
-      this.logger.extend('CLOSE')(`Running compiler.`)
+      this.logger.extend('CLOSE')('Running compiler.')
       return this.compile()
     }
   }

@@ -1,25 +1,29 @@
-
-
-import { keys } from '@libp2p/crypto'
-import { hexToBytes } from '@ethereumjs/util'
-import { multiaddr } from '@multiformats/multiaddr'
-import { SignableENR } from '@chainsafe/enr'
 import { UDPTransportService } from '@chainsafe/discv5'
+import { SignableENR } from '@chainsafe/enr'
+import { hexToBytes } from '@ethereumjs/util'
+import { keys } from '@libp2p/crypto'
+import { multiaddr } from '@multiformats/multiaddr'
 
 import { NetworkId } from '../networks/index.js'
 import { RateLimiter } from '../transports/rateLimiter.js'
 import { MEGABYTE } from '../util/index.js'
-import { TransportLayer } from './types.js'
 import { PortalNetwork } from './client.js'
+import { TransportLayer } from './types.js'
 
+<<<<<<< HEAD
 import type { 
   IDiscv5CreateOptions, 
   ITransportService, 
   SignableENRInput,
  } from '@chainsafe/discv5'
+=======
+import type { IDiscv5CreateOptions, ITransportService, SignableENRInput } from '@chainsafe/discv5'
+>>>>>>> master
 import type { PortalNetworkOpts } from './types.js'
 
-export async function createPortalNetwork(opts: Partial<PortalNetworkOpts>): Promise<PortalNetwork> {
+export async function createPortalNetwork(
+  opts: Partial<PortalNetworkOpts>,
+): Promise<PortalNetwork> {
   const defaultConfig: IDiscv5CreateOptions = {
     enr: opts.config?.enr ?? ({} as SignableENRInput),
     privateKey: opts.config?.privateKey ?? (await keys.generateKeyPair('secp256k1')),
@@ -74,23 +78,31 @@ export async function createPortalNetwork(opts: Partial<PortalNetworkOpts>): Pro
   } else {
     ma = opts.config.bindAddrs.ip4
   }
-  
+
   // Configure db size calculation
   let dbSize
   switch (opts.transport) {
     case TransportLayer.WEB:
+<<<<<<< HEAD
       dbSize = async function () {
+=======
+      dbSize = async () => {
+>>>>>>> master
         const sizeEstimate = await window.navigator.storage.estimate()
         return sizeEstimate.usage !== undefined ? sizeEstimate.usage / MEGABYTE : 0
       }
       break
+<<<<<<< HEAD
     case TransportLayer.NODE:
     case TransportLayer.TAURI:
+=======
+>>>>>>> master
     default:
       dbSize = opts.dbSize
   }
 
   let transportService: ITransportService
+<<<<<<< HEAD
   
   if (opts.transportServices) {
     switch (opts.transport) {
@@ -123,18 +135,57 @@ export async function createPortalNetwork(opts: Partial<PortalNetworkOpts>): Pro
         transportService = opts.transportServices.createNodeTransport(
           config.bindAddrs, 
           config.enr.nodeId, 
+=======
+
+  if (opts.transportServices !== undefined) {
+    switch (opts.transport) {
+      case TransportLayer.WEB:
+        {
+          if (opts.transportServices.createWebSocketTransport === undefined) {
+            throw new Error('WebSocket transport service not provided')
+          }
+          const proxyAddress = opts.proxyAddress ?? 'ws://127.0.0.1:5050'
+          transportService = opts.transportServices.createWebSocketTransport(
+            ma,
+            config.enr.nodeId,
+            proxyAddress,
+            new RateLimiter(),
+          )
+        }
+        break
+      case TransportLayer.TAURI:
+        if (opts.transportServices.createTauriTransport === undefined) {
+          throw new Error('Tauri transport service not provided')
+        }
+        transportService = opts.transportServices.createTauriTransport(ma, config.enr.nodeId)
+        break
+      default:
+        if (opts.transportServices.createNodeTransport === undefined) {
+          throw new Error('Node transport service not provided')
+        }
+        transportService = opts.transportServices.createNodeTransport(
+          config.bindAddrs,
+          config.enr.nodeId,
+>>>>>>> master
           new RateLimiter(),
         )
         break
     }
   } else {
     transportService = new UDPTransportService({
+<<<<<<< HEAD
       bindAddrs: config.bindAddrs, 
       nodeId: config.enr.nodeId, 
+=======
+      bindAddrs: config.bindAddrs,
+      nodeId: config.enr.nodeId,
+>>>>>>> master
       rateLimiter: new RateLimiter(),
     })
   }
   
+  config.transport = transportService
+
   config.transport = transportService
 
   const portal = new PortalNetwork({

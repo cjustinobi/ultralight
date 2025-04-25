@@ -5,10 +5,12 @@ import { hexToBytes } from 'ethereum-cryptography/utils'
 import { assert, describe, it } from 'vitest'
 import type { HistoryNetwork } from '../../src'
 import {
+  MessageCodes,
   NetworkId,
- 
+  PortalWireMessageType,
   SupportedVersions,
-  TransportLayer, createPortalNetwork,
+  TransportLayer,
+  createPortalNetwork,
 } from '../../src/index.js'
 const privateKeys = [
   '0x0a2700250802122102273097673a2948af93317235d2f02ad9cf3b79a34eeb37720c5f19e09f11783c12250802122102273097673a2948af93317235d2f02ad9cf3b79a34eeb37720c5f19e09f11783c1a2408021220aae0fff4ac28fdcdf14ee8ecb591c7f1bc78651206d86afe16479a63d9cb73bd',
@@ -20,9 +22,9 @@ const pk2 = keys.privateKeyFromProtobuf(hexToBytes(privateKeys[1]).slice(-36))
 const enr2 = SignableENR.createFromPrivateKey(pk2)
 
 describe('black list test', async () => {
-  const initMa: any = multiaddr(`/ip4/127.0.0.1/udp/5030`)
+  const initMa: any = multiaddr('/ip4/127.0.0.1/udp/5030')
   enr1.setLocationMultiaddr(initMa)
-  const initMa2: any = multiaddr(`/ip4/127.0.0.1/udp/5031`)
+  const initMa2: any = multiaddr('/ip4/127.0.0.1/udp/5031')
   enr2.setLocationMultiaddr(initMa2)
   const node1 = await createPortalNetwork({
     transport: TransportLayer.NODE,
@@ -74,9 +76,9 @@ describe('black list test', async () => {
 })
 
 describe('version conflict', async () => {
-  const initMa: any = multiaddr(`/ip4/127.0.0.1/udp/5032`)
+  const initMa: any = multiaddr('/ip4/127.0.0.1/udp/5032')
   enr1.setLocationMultiaddr(initMa)
-  const initMa2: any = multiaddr(`/ip4/127.0.0.1/udp/5033`)
+  const initMa2: any = multiaddr('/ip4/127.0.0.1/udp/5033')
   enr2.setLocationMultiaddr(initMa2)
   const node1 = await createPortalNetwork({
     transport: TransportLayer.NODE,
@@ -118,16 +120,36 @@ describe('version conflict', async () => {
     assert.isFalse(control)
   })
 
-  const pong = await network1?.sendPing(network2?.enr!.toENR())
-  it('should fail to ping peer with version conflict', async () => {
-    assert.isUndefined(pong)
+  // const pong = await network1?.sendPing(network2?.enr!.toENR())
+  // Send a PING (bypass version conflict)
+  const pingMsg = PortalWireMessageType[0].serialize({
+    selector: MessageCodes.PING,
+    value: {
+      enrSeq: node1.discv5.enr.seq,
+      payloadType: 0,
+      customPayload: network1.pingPongPayload(0),
+    },
   })
-  const blacklisted = node1.isBlackListed(node2.discv5.enr.getLocationMultiaddr('udp')!)
+  const res = await network1?.sendMessage(
+    node2.discv5.enr.toENR(),
+    pingMsg,
+    NetworkId.HistoryNetwork,
+  )
+
+  it('should fail to ping peer with version conflict', async () => {
+    assert.deepEqual(res, Uint8Array.from([]))
+  })
+  const blacklisted = node2.isBlackListed(node1.discv5.enr.getLocationMultiaddr('udp')!)
   it('should blacklist peer with version conflict', async () => {
     assert.isTrue(blacklisted)
   })
-  const compare = await node1.highestCommonVersion(node2.discv5.enr.toENR())
+
   it('should compare versions', async () => {
-    assert.equal(compare, -1)
+    try {
+      await node1.highestCommonVersion(node2.discv5.enr.toENR())
+      assert.fail('should have thrown')
+    } catch (e) {
+      assert.equal(e.message, `No common version found with ${enr2.nodeId}`)
+    }
   })
 })

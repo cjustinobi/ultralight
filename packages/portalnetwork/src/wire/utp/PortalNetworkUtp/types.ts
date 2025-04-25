@@ -1,7 +1,8 @@
 import type { ENR } from '@chainsafe/enr'
 
-import type { NetworkId } from '../../../networks/types.js'
 import type { INodeAddress } from '@chainsafe/discv5/lib/session/nodeInfo.js'
+import type { Version } from '../../../index.js'
+import type { NetworkId } from '../../../networks/types.js'
 
 export type UtpSocketKey = string
 
@@ -22,8 +23,8 @@ export interface INewRequest {
   connectionId: number
   requestCode: RequestCode
   contents?: Uint8Array
+  version?: Version
 }
-
 
 export const MAX_IN_FLIGHT_PACKETS = 3
 
